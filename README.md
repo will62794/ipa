@@ -23,6 +23,6 @@ If we know the interface that each module depends on for its behavior, though, w
 
 A question, then, is how to formally check that such an abstraction is actually interaction preserving? It seems we could verify this property by checking that, for every interaction variable $x_R$ that $M_2$ reads from, verify that $M_2 \Rightarrow \overset{\sim}{M_2}$ when letting the initial condition on these read input variables allow any possible (i.e. type-correct) value. 
 
-Alternatively, I think it would be sufficient to simply check $$(M_1 \mid\mid M_2) \Rightarrow \overset{\sim}{M_2}$$ but this obviously has the drawback that you're required to verify the full, original composition $M_1 \mid\mid M_2$. I'm also not sure if this technically shows that $\overset{\sim}{M_2}$ is an interaction preserving abstraction of $M_2$. 
+Alternatively, I think it would be sufficient to simply check $(M_1 \mid\mid M_2) \Rightarrow \overset{\sim}{M_2}$ but this obviously has the drawback that you're required to verify the full, original composition $M_1 \mid\mid M_2$. I'm also not sure if this technically shows that $\overset{\sim}{M_2}$ is an interaction preserving abstraction of $M_2$. 
 Rather, it seems to show that $\overset{\sim}{M_2}$ is an interaction preserving abstraction of $M_2$ *when operating in the context of* $M_1$. In practice, that seems to be all you really need to check, but might actually be a weaker property than showing interaction preservation in general.
 
