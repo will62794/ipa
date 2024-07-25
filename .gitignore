@@ -1,1 +1,4 @@
 *.DS_Store
+states.dot
+states.pdf
+states/
