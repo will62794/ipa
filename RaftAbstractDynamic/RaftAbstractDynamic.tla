@@ -201,7 +201,8 @@ OplogCommitment(s) ==
 ClientRequest(i) ==
     /\ guard::
         state[i] = Primary
-    /\ log' = [log EXCEPT ![i] = Append(log[i], currentTerm[i])]
+    /\ post::
+        /\ log' = [log EXCEPT ![i] = Append(log[i], currentTerm[i])]
     /\ UNCHANGED <<currentTerm, state, immediatelyCommitted, config, configVersion, configTerm>>
 
 \* Node 'i' gets a new log entry from node 'j'.
@@ -230,7 +231,8 @@ RollbackEntries(i, j) ==
         /\ state[i] = Secondary
         /\ CanRollback(i, j)
     \* Roll back one log entry.
-    /\ log' = [log EXCEPT ![i] = SubSeq(log[i], 1, Len(log[i])-1)]
+    /\ post::
+        /\ log' = [log EXCEPT ![i] = SubSeq(log[i], 1, Len(log[i])-1)]
     /\ UNCHANGED <<immediatelyCommitted, currentTerm, state, config, configVersion, configTerm>>
 
 \* Node 'i' gets elected as a primary.
@@ -295,9 +297,10 @@ SendConfig(i, j) ==
     /\ guard::
         /\ state[j] = Secondary
         /\ IsNewerConfig(i, j)
-    /\ configVersion' = [configVersion EXCEPT ![j] = configVersion[i]]
-    /\ configTerm' = [configTerm EXCEPT ![j] = configTerm[i]]
-    /\ config' = [config EXCEPT ![j] = config[i]]
+    /\ post::
+        /\ configVersion' = [configVersion EXCEPT ![j] = configVersion[i]]
+        /\ configTerm' = [configTerm EXCEPT ![j] = configTerm[i]]
+        /\ config' = [config EXCEPT ![j] = config[i]]
     /\ UNCHANGED <<currentTerm, state, log, immediatelyCommitted>>
 
 
@@ -336,37 +339,55 @@ Next ==
 NextUnchanged == UNCHANGED vars
 
 
-Action1 == \E s, t \in Server : RollbackEntries(s, t)
-Action1pre == \E s, t \in Server : RollbackEntries(s, t)!guard
-Action2 == \E s,t \in Server : SendConfig(s, t)
-Action2pre == \E s,t \in Server : SendConfig(s, t)!guard
-\* Action2 == \E s \in Server : ClientRequest(s)
-\* Action2pre == \E s \in Server : ClientRequest(s)!guard
+Action_RollbackEntries == [
+    action |-> \E s, t \in Server : RollbackEntries(s, t),
+    pre |-> \E s, t \in Server : RollbackEntries(s, t)!guard,
+    pre_primed |-> \E s, t \in Server : RollbackEntries(s, t)!guard',
+    post |-> {RollbackEntries(s, t)!post!1!2 : s,t \in Server},
+    post_primed |-> {RollbackEntries(s, t)!post!1!2' : s,t \in Server}
+]
 
-\* Action1PostExprs == StartAcquirePostExprs
-\* Action2PostExprs == TakeLock1PostExprs
+Action_ClientRequest == [
+    action |-> \E s \in Server : ClientRequest(s),
+    pre |-> \E s \in Server : ClientRequest(s)!guard,
+    pre_primed |-> \E s \in Server : ClientRequest(s)!guard',
+    post |-> {ClientRequest(s)!post!1!2 : s \in Server},
+    post_primed |-> {ClientRequest(s)!post!1!2' : s \in Server}
+]
+
+Action_SendConfig == [
+    action |-> \E s, t \in Server : SendConfig(s, t),
+    pre |-> \E s, t \in Server : SendConfig(s, t)!guard,
+    pre_primed |-> \E s, t \in Server : SendConfig(s, t)!guard',
+    post |-> {SendConfig(s, t)!post!1!2 : s,t \in Server},
+    post_primed |-> {SendConfig(s, t)!post!1!2' : s,t \in Server}
+]
+
 
 \* IndependenceInit == TypeOK
 \* IndependenceNext == Action1 \/ Action2
 
-Independence == 
-    \* Action2 cannot disable Action1.
-    /\ [][((ENABLED Action1 /\ Action2 ) => (Action1pre)')]_vars
-    \* Action2 cannot enable Action1.
-    /\ [][((~ENABLED Action1 /\ Action2 ) => (~Action1pre)')]_vars
-    \* Action1 cannot disable Action2.
-    /\ [][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars
-    \* Action1 cannot enable Action2.
-    /\ [][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars
+\* Is action A1 independent of action A2.
+IndependenceCond(A1,A2) == 
+    \* A2 cannot disable A1.
+    /\ (A1.pre /\ A2.action) => (A1.pre_primed)
+    \* A2 cannot enable A1.
+    /\ (~A1.pre /\ A2.action) => (~A1.pre_primed)
+    \* Writes of A2 cannot influence inputs/writes of A1.
+    /\ A1.action => A2.post = A2.post_primed
 
-\* TODO.
+\* P1 == [][IndependenceCond(Action_RollbackEntries,Action_SendConfig)]_vars
+P1 == [][IndependenceCond(Action_ClientRequest,Action_SendConfig)]_vars
+\* P1 == [][IndependenceCond(Action_RollbackEntries,Action_ClientRequest)]_vars
+
+
 \* Basically this is saying that the writes of each actions are "independent" i.e. the
 \* writes of one action does not affect the values written by the other action.
 \* We can test this by checking if, from any state, the update expressions of Action2 
 \* are modified after taking an Action1 step, and vice versa.
 \* Commutativity == 
-    \* /\ [][Action1 => Action2PostExprs = Action2PostExprs']_vars
-    \* /\ [][Action2 => Action1PostExprs = Action1PostExprs']_vars
+\*     /\ [][Action1 => Action2PostExprs = Action2PostExprs']_vars
+\*     /\ [][Action2 => Action1PostExprs = Action1PostExprs']_vars
 
 
 
