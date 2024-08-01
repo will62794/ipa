@@ -2,3 +2,5 @@
 states.dot
 states.pdf
 states/
+*.xml
+logout
