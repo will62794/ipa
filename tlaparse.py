@@ -409,6 +409,33 @@ class TLASpec:
         # spec_obj = self.extract_spec_obj(spec_ast)
         # return self.spec_obj["defs"]
         # pass
+
+    def get_action_var_info(self, action):
+        vars_in_action, action_updated_vars = self.get_vars_in_def(action)
+        vars_in_action_non_updated, _ = self.get_vars_in_def(action, ignore_update_expressions=True)
+        # print(f"### Vars in action '{action}'", vars_in_action)
+        # print("----")
+        # print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
+        # print("----")
+        # print("### Vars COI for updated in action:", action_updated_vars)
+        # print("### Vars COI for updated in action:")
+        # print("----")
+
+        # for v in action_updated_vars:
+            # print(f" - var: '{v}'", ", COI:", action_updated_vars[v])
+
+        # Variables read from.
+        read_vars = vars_in_action - action_updated_vars.keys()
+
+        # Variables written to.
+        written_vars = action_updated_vars.keys()
+
+        return {
+            "read_vars": read_vars,
+            "written_vars": written_vars
+        }
+
+
     
     def extract_OpApplNode(self, elem, curr_quants, curr_preds):
 
@@ -820,19 +847,23 @@ if __name__ == "__main__":
     # exit()
 
     for action in actions_from_spec:
-        # action = "GetEntriesAction"
-        print("\n\n### Getting vars in action:", action)
-        vars_in_action, action_updated_vars = my_spec.get_vars_in_def(action)
-        vars_in_action_non_updated, _ = my_spec.get_vars_in_def(action, ignore_update_expressions=True)
-        print(f"### Vars in action '{action}'", vars_in_action)
-        # print("----")
-        print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
-        # print("----")
-        # print("### Vars COI for updated in action:", action_updated_vars)
-        print("### Vars COI for updated in action:")
-        # print("----")
-        for v in action_updated_vars:
-            print(f" - var: '{v}'", ", COI:", action_updated_vars[v])
+        print("\n### Getting vars in action:", action)
+        ret = my_spec.get_action_var_info(action)
+        print(ret)
+
+        # # action = "GetEntriesAction"
+        # print("\n\n### Getting vars in action:", action)
+        # vars_in_action, action_updated_vars = my_spec.get_vars_in_def(action)
+        # vars_in_action_non_updated, _ = my_spec.get_vars_in_def(action, ignore_update_expressions=True)
+        # print(f"### Vars in action '{action}'", vars_in_action)
+        # # print("----")
+        # print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
+        # # print("----")
+        # # print("### Vars COI for updated in action:", action_updated_vars)
+        # print("### Vars COI for updated in action:")
+        # # print("----")
+        # for v in action_updated_vars:
+        #     print(f" - var: '{v}'", ", COI:", action_updated_vars[v])
 
         # lemma = "T1"
         # # print("### Getting vars in def:", lemma)
