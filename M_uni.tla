@@ -7,6 +7,8 @@ VARIABLE a
 VARIABLE b
 VARIABLE c
 
+vars == <<a, b, c>>
+
 cycle == 4
 
 Init == 
@@ -15,19 +17,26 @@ Init ==
     /\ c = 0
 
 IncrementA == 
-    /\ b = 0
+    /\ guard::
+        /\ b = 0
     /\ a' = a + b
-    /\ UNCHANGED b
-    /\ UNCHANGED c
+    /\ UNCHANGED <<b,c>>
+IncrementAPostExprs == <<a + b>>
 
 IncrementB == 
+    /\ guard::
+        /\ TRUE
     /\ b' = b + 2
-    /\ UNCHANGED c
+    /\ UNCHANGED <<a,c>>
+IncrementBPostExprs == <<b + 2>>
 
 IncrementC == 
+    /\ guard::
+        /\ TRUE
     /\ c' = (c + 1) % cycle
     /\ c < cycle
-    /\ UNCHANGED b
+    /\ UNCHANGED <<a,b>>
+IncrementCPostExprs == <<(c + 1) % cycle, c < cycle>>
 
 \* 
 \* Consider module split of M1={IncrementA} and M2={IncrementB, IncrementC}
@@ -44,5 +53,48 @@ Next ==
     \/ IncrementA
     \/ IncrementB
     \/ IncrementC
+
+TypeOK == 
+    /\ a \in 0..cycle
+    /\ b \in 0..cycle
+    /\ c \in 0..cycle
+
+
+Action1 == IncrementA
+Action1pre == IncrementA!guard
+Action1PostExprs == IncrementAPostExprs
+
+\* Action2 == IncrementB
+\* Action2pre == IncrementB!guard
+\* Action2PostExprs == IncrementBPostExprs
+
+Action2 == IncrementC
+Action2pre == IncrementC!guard
+Action2PostExprs == IncrementCPostExprs
+
+IndependenceInit == TypeOK
+IndependenceNext == Action1 \/ Action2
+
+Independence == 
+    \* Action2 cannot disable Action1.
+    /\ [][((ENABLED Action1 /\ Action2 ) => (Action1pre)')]_vars
+    \* Action2 cannot enable Action1.
+    /\ [][((~ENABLED Action1 /\ Action2 ) => (~Action1pre)')]_vars
+    \* Action1 cannot disable Action2.
+    /\ [][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars
+    \* Action1 cannot enable Action2.
+    /\ [][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars
+
+\* TODO.
+\* Basically this is saying that the writes of each actions are "independent" i.e. the
+\* writes of one action does not affect the values written by the other action.
+\* We can test this by checking if, from any state, the update expressions of Action2 
+\* are modified after taking an Action1 step, and vice versa.
+Commutativity == 
+    /\ [][Action1 => Action2PostExprs = Action2PostExprs']_vars
+    /\ [][Action2 => Action1PostExprs = Action1PostExprs']_vars
+\* Starting from any state, record all states reachable by Action1.
+\* Then record all states reachable from these states by Action2.
+
 
 ====
