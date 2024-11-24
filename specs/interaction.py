@@ -52,7 +52,7 @@ for action1 in action_interaction_vars:
             # Create edge with interaction variables as label
             dot.edge(action2, action1, 
                     label=f"{','.join(interaction_vars)}", 
-                    fontsize='8')
+                    fontsize='12')
 
 # Save the graph
 dot.render('TwoPhase_interaction_graph', view=True)
