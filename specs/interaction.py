@@ -1,8 +1,8 @@
 import tlaparse
 import graphviz
 
-tla_file = "TwoPhase"
-my_spec = tlaparse.parse_tla_file("TwoPhase", tla_file)
+specname = "Paxos"
+my_spec = tlaparse.parse_tla_file(specname, specname)
 
 top_level_defs = my_spec.get_all_user_defs(level="1")
 spec_obj = my_spec.get_spec_obj()
@@ -55,8 +55,8 @@ for action1 in action_interaction_vars:
                     fontsize='12')
 
 # Save the graph
-dot.render('TwoPhase_interaction_graph', view=True)
-dot.render('TwoPhase_interaction_graph', view=True, format='png')
+dot.render(f'{specname}_interaction_graph', view=True)
+dot.render(f'{specname}_interaction_graph', view=False, format='png')
 
 
 
