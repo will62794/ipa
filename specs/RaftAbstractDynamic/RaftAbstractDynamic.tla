@@ -204,6 +204,8 @@ ClientRequest(i) ==
     /\ post::
         /\ log' = [log EXCEPT ![i] = Append(log[i], currentTerm[i])]
     /\ UNCHANGED <<currentTerm, state, immediatelyCommitted, config, configVersion, configTerm>>
+ClientRequestRVars == <<state, currentTerm, log>>
+ClientRequestWVars == <<log>>
 
 \* Node 'i' gets a new log entry from node 'j'.
 GetEntries(i, j) ==
@@ -224,6 +226,8 @@ GetEntries(i, j) ==
               newLog        == Append(log[i], newEntry) IN
               /\ log' = [log EXCEPT ![i] = newLog]
     /\ UNCHANGED <<immediatelyCommitted, currentTerm, state, config, configVersion, configTerm>>
+GetEntriesRVars == <<state, log>>
+GetEntriesWVars == <<log>>
 
 \*  Node 'i' rolls back against the log of node 'j'.  
 RollbackEntries(i, j) ==
@@ -234,6 +238,8 @@ RollbackEntries(i, j) ==
     /\ post::
         /\ log' = [log EXCEPT ![i] = SubSeq(log[i], 1, Len(log[i])-1)]
     /\ UNCHANGED <<immediatelyCommitted, currentTerm, state, config, configVersion, configTerm>>
+RollbackEntriesRVars == <<state, log>>
+RollbackEntriesWVars == <<log>>
 
 \* Node 'i' gets elected as a primary.
 BecomeLeader(i, voteQuorum) == 
@@ -252,7 +258,9 @@ BecomeLeader(i, voteQuorum) ==
     \* Update config's term upon becoming primary.
     /\ configTerm' = [configTerm EXCEPT ![i] = newTerm]
     /\ UNCHANGED <<log, immediatelyCommitted, config, configVersion>>   
-            
+BecomeLeaderRVars == <<state, currentTerm, log, config, configVersion, configTerm>>
+BecomeLeaderWVars == <<currentTerm, state, configTerm>>
+
 \* Primary 'i' commits its latest log entry.
 CommitEntry(i, commitQuorum) ==
     LET ind == Len(log[i]) IN
@@ -268,6 +276,8 @@ CommitEntry(i, commitQuorum) ==
     /\ ~\E c \in immediatelyCommitted : c[1] = ind /\ c[2] = currentTerm[i] 
     /\ immediatelyCommitted' = immediatelyCommitted \cup {<<ind, currentTerm[i]>>}
     /\ UNCHANGED <<currentTerm, state, log, config, configVersion, configTerm>>
+CommitEntryRVars == <<state, currentTerm, log, config>>
+CommitEntryWVars == <<immediatelyCommitted>>
 
 \* Action that exchanges terms between two nodes and step down the primary if
 \* needed. This can be safely specified as a separate action, rather than
@@ -277,7 +287,8 @@ CommitEntry(i, commitQuorum) ==
 UpdateTerms(i, j) == 
     /\ UpdateTermsExpr(i, j)
     /\ UNCHANGED <<log, immediatelyCommitted, config, configVersion, configTerm>>
-
+UpdateTermsRVars == <<currentTerm>>
+UpdateTermsWVars == <<currentTerm, state>>
 
 \* A reconfig occurs on node i. The node must currently be a leader.
 Reconfig(i, newConfig) ==
@@ -291,6 +302,8 @@ Reconfig(i, newConfig) ==
     /\ configVersion' = [configVersion EXCEPT ![i] = configVersion[i] + 1]
     /\ config' = [config EXCEPT ![i] = newConfig]
     /\ UNCHANGED <<currentTerm, state, log, immediatelyCommitted>>
+ReconfigRVars == <<state, currentTerm, log, config, configVersion, configTerm>>
+ReconfigWVars == <<config, configVersion, configTerm>>
 
 \* Node i sends its current config to node j.
 SendConfig(i, j) ==
@@ -302,7 +315,8 @@ SendConfig(i, j) ==
         /\ configTerm' = [configTerm EXCEPT ![j] = configTerm[i]]
         /\ config' = [config EXCEPT ![j] = config[i]]
     /\ UNCHANGED <<currentTerm, state, log, immediatelyCommitted>>
-
+SendConfigRVars == <<state, configVersion, configTerm>>
+SendConfigWVars == <<config, configVersion, configTerm>>
 
 Init == 
     /\ currentTerm = [i \in Server |-> InitTerm]

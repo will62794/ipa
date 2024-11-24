@@ -1,7 +1,8 @@
 import tlaparse
 import graphviz
 
-specname = "Paxos"
+# specname = "Paxos"
+specname = "RaftAbstractDynamic"
 my_spec = tlaparse.parse_tla_file(specname, specname)
 
 top_level_defs = my_spec.get_all_user_defs(level="1")
