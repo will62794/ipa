@@ -302,8 +302,8 @@ Reconfig(i, newConfig) ==
     /\ configVersion' = [configVersion EXCEPT ![i] = configVersion[i] + 1]
     /\ config' = [config EXCEPT ![i] = newConfig]
     /\ UNCHANGED <<currentTerm, state, log, immediatelyCommitted>>
-ReconfigRVars == <<state, currentTerm, log, config, configVersion, configTerm>>
-ReconfigWVars == <<config, configVersion, configTerm>>
+\* ReconfigRVars == <<state, currentTerm, log, config, configVersion, configTerm>>
+\* ReconfigWVars == <<config, configVersion, configTerm>>
 
 \* Node i sends its current config to node j.
 SendConfig(i, j) ==
@@ -315,8 +315,8 @@ SendConfig(i, j) ==
         /\ configTerm' = [configTerm EXCEPT ![j] = configTerm[i]]
         /\ config' = [config EXCEPT ![j] = config[i]]
     /\ UNCHANGED <<currentTerm, state, log, immediatelyCommitted>>
-SendConfigRVars == <<state, configVersion, configTerm>>
-SendConfigWVars == <<config, configVersion, configTerm>>
+\* SendConfigRVars == <<state, configVersion, configTerm>>
+\* SendConfigWVars == <<config, configVersion, configTerm>>
 
 Init == 
     /\ currentTerm = [i \in Server |-> InitTerm]
