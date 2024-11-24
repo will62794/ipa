@@ -1,5 +1,6 @@
 // Action Interaction Graph
 digraph {
+	rankdir=LR
 	TMRcvPrepared [shape=box style=rounded]
 	RMPrepare [shape=box style=rounded]
 	RMChooseToAbort [shape=box style=rounded]

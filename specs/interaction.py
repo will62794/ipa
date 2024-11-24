@@ -32,6 +32,7 @@ for a in action_interaction_vars:
 # Generate DOT digraph that reports an edge between action nodes if the two actions interact i.e.
 # A1 reads from a variable that A2 writes to. Also include along the edges the interaction variables.
 dot = graphviz.Digraph(comment='Action Interaction Graph')
+dot.attr(rankdir='LR')
 
 # Add nodes for each action
 for action in action_interaction_vars:
