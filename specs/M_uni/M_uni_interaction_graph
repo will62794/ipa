@@ -1,0 +1,9 @@
+// Action Interaction Graph
+digraph {
+	rankdir=LR
+	IncrementA [shape=box style=rounded]
+	IncrementB [shape=box style=rounded]
+	IncrementC [shape=box style=rounded]
+	IncrementB -> IncrementA [label=b fontsize=12]
+	IncrementC -> IncrementB [label=c fontsize=12]
+}

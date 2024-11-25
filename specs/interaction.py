@@ -1,10 +1,12 @@
 import tlaparse
 import graphviz
-
+import sys
 # specname = "Paxos"
 specname = "RaftAbstractDynamic"
 specname = "AsyncRaft"
 specname = "consensus_epr"
+specname = "M_uni"
+specname = sys.argv[1]
 
 my_spec = tlaparse.parse_tla_file(specname, specname)
 
@@ -68,8 +70,8 @@ for action1 in action_interaction_vars:
                     fontsize='12')
 
 # Save the graph
-dot.render(f'{specname}_interaction_graph', view=True)
-dot.render(f'{specname}_interaction_graph', view=False, format='png')
+dot.render(f'{specname}/{specname}_interaction_graph', view=True)
+dot.render(f'{specname}/{specname}_interaction_graph', view=False, format='png')
 
 
 
