@@ -11,4 +11,5 @@ digraph {
 	SendVote -> RecvVote [label=vote_msg fontsize=12]
 	RecvVote -> BecomeLeader [label=votes fontsize=12]
 	BecomeLeader -> Decide [label=leader fontsize=12]
+	dpi=300
 }
