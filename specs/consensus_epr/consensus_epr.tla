@@ -72,9 +72,9 @@ DecideAction == TRUE /\ \E i,j \in Node, v \in Value : Decide(i,v)
 Next == 
     \/ SendRequestVoteAction
     \/ SendVoteAction
-    \* \/ RecvVoteAction
-    \* \/ BecomeLeaderAction
-    \* \/ DecideAction
+    \/ RecvVoteAction
+    \/ BecomeLeaderAction
+    \/ DecideAction
 
 \* Any two chosen values must be consistent.
 H_NoConflictingValues == 

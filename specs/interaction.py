@@ -3,6 +3,9 @@ import graphviz
 
 # specname = "Paxos"
 specname = "RaftAbstractDynamic"
+specname = "AsyncRaft"
+specname = "consensus_epr"
+
 my_spec = tlaparse.parse_tla_file(specname, specname)
 
 top_level_defs = my_spec.get_all_user_defs(level="1")
@@ -15,20 +18,29 @@ actions_from_spec = []
 for udef in my_spec.get_all_user_defs(level="2"):
     if udef.endswith("Action"):
         actions_from_spec.append(udef)
-        print(udef)
-print("--")
-action_interaction_vars = {a.replace("Action", ""):{"rvars":[], "wvars":[]} for a in actions_from_spec}
-print(action_interaction_vars)
-for udef in my_spec.get_all_user_defs(level="1"):
-    if "RVars" in udef:
-        print(udef, my_spec.get_vars_in_def(udef)[0])
-        action_interaction_vars[udef.replace("RVars", "")]["rvars"] = (my_spec.get_vars_in_def(udef)[0])
-    if "WVars" in udef:
-        print(udef, my_spec.get_vars_in_def(udef)[0])
-        action_interaction_vars[udef.replace("WVars", "")]["wvars"] = (my_spec.get_vars_in_def(udef)[0])
-print("Interaction graph:")
-for a in action_interaction_vars:
-    print(a, action_interaction_vars[a])
+        # print(udef)
+
+
+action_interaction_vars = {a.replace("Action", ""):{} for a in actions_from_spec}
+for action in actions_from_spec:
+    ret = my_spec.get_action_var_info(action)
+    print(action, ret)
+    action_interaction_vars[action.replace("Action", "")] = ret
+
+
+# print("--")
+# action_interaction_vars = {a.replace("Action", ""):{"rvars":[], "wvars":[]} for a in actions_from_spec}
+# print(action_interaction_vars)
+# for udef in my_spec.get_all_user_defs(level="1"):
+#     if "RVars" in udef:
+#         print(udef, my_spec.get_vars_in_def(udef)[0])
+#         action_interaction_vars[udef.replace("RVars", "")]["rvars"] = (my_spec.get_vars_in_def(udef)[0])
+#     if "WVars" in udef:
+#         print(udef, my_spec.get_vars_in_def(udef)[0])
+#         action_interaction_vars[udef.replace("WVars", "")]["wvars"] = (my_spec.get_vars_in_def(udef)[0])
+# print("Interaction graph:")
+# for a in action_interaction_vars:
+#     print(a, action_interaction_vars[a])
 
 # Generate DOT digraph that reports an edge between action nodes if the two actions interact i.e.
 # A1 reads from a variable that A2 writes to. Also include along the edges the interaction variables.
@@ -46,8 +58,8 @@ for action1 in action_interaction_vars:
             continue
             
         # Find variables that action1 reads and action2 writes
-        interaction_vars = set(action_interaction_vars[action1]["rvars"]) & \
-                         set(action_interaction_vars[action2]["wvars"])
+        interaction_vars = set(action_interaction_vars[action1]["read_vars"]) & \
+                         set(action_interaction_vars[action2]["write_vars"])
                          
         if interaction_vars:
             # Create edge with interaction variables as label

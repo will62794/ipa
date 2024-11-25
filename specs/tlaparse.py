@@ -413,7 +413,7 @@ class TLASpec:
     def get_action_var_info(self, action):
         vars_in_action, action_updated_vars = self.get_vars_in_def(action)
         vars_in_action_non_updated, _ = self.get_vars_in_def(action, ignore_update_expressions=True)
-        # print(f"### Vars in action '{action}'", vars_in_action)
+        print(f"### Vars in action '{action}'", vars_in_action, action_updated_vars)
         # print("----")
         # print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
         # print("----")
@@ -425,14 +425,14 @@ class TLASpec:
             # print(f" - var: '{v}'", ", COI:", action_updated_vars[v])
 
         # Variables read from.
-        read_vars = vars_in_action - action_updated_vars.keys()
+        read_vars = vars_in_action # - action_updated_vars.keys()
 
         # Variables written to.
-        written_vars = action_updated_vars.keys()
+        written_vars = set(action_updated_vars.keys())
 
         return {
             "read_vars": read_vars,
-            "written_vars": written_vars
+            "write_vars": written_vars
         }
 
 

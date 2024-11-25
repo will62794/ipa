@@ -1,0 +1,14 @@
+// Action Interaction Graph
+digraph {
+	rankdir=LR
+	SendRequestVote [shape=box style=rounded]
+	SendVote [shape=box style=rounded]
+	RecvVote [shape=box style=rounded]
+	BecomeLeader [shape=box style=rounded]
+	Decide [shape=box style=rounded]
+	SendVote -> SendRequestVote [label=vote_request_msg fontsize=12]
+	SendRequestVote -> SendVote [label=vote_request_msg fontsize=12]
+	SendVote -> RecvVote [label=vote_msg fontsize=12]
+	RecvVote -> BecomeLeader [label=votes fontsize=12]
+	BecomeLeader -> Decide [label=leader fontsize=12]
+}
