@@ -6,4 +6,5 @@ digraph {
 	IncrementC [shape=box style=rounded]
 	IncrementB -> IncrementA [label=b fontsize=12]
 	IncrementC -> IncrementB [label=c fontsize=12]
+	dpi=300
 }

@@ -70,6 +70,7 @@ for action1 in action_interaction_vars:
                     fontsize='12')
 
 # Save the graph
+dot.attr(dpi='300')
 dot.render(f'{specname}/{specname}_interaction_graph', view=True)
 dot.render(f'{specname}/{specname}_interaction_graph', view=False, format='png')
 
