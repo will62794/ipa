@@ -4,3 +4,5 @@ states.pdf
 states/
 *.xml
 logout
+*_interaction.cfg
+*_interaction.tla

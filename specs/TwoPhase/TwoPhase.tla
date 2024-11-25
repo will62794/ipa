@@ -189,7 +189,7 @@ RMRcvAbortMsgAction == TRUE /\ \E rm \in RM : RMRcvAbortMsg(rm)
 TMAbortAction == TRUE /\ TMAbort
 TMCommitAction == TRUE /\ TMCommit
 
-RMAtomicAction(rm) == 
+RMAtomic(rm) == 
     /\ msgsCommit = {} 
     /\ msgsAbort = {}
     /\ msgsPrepared' = msgsPrepared \cup {[type |-> "Prepared", rm |-> rm]}
@@ -205,7 +205,7 @@ Next ==
   \/ RMRcvAbortMsgAction
 
 NextAtomicRM == 
-    \/ \E rm \in RM : RMAtomicAction(rm)
+    \/ \E rm \in RM : RMAtomic(rm)
     \/ TMCommitAction 
     \/ TMAbortAction
     \/ TMRcvPreparedAction

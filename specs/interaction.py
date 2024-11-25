@@ -51,6 +51,8 @@ for action in actions_from_spec:
 # A1 reads from a variable that A2 writes to. Also include along the edges the interaction variables.
 dot = graphviz.Digraph(comment='Action Interaction Graph')
 dot.attr(rankdir='LR')
+# dot.attr(nodesep='0.1')
+
 
 # Add nodes for each action
 for action in action_interaction_vars:
@@ -88,76 +90,82 @@ dot.render(f'{specname}/{specname}_interaction_graph', view=False, format='png')
 #     \* Action1 cannot enable Action2.
 #     /\ [][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars
 
-# Check semantic interaction between actions.
-for action1, action2 in itertools.product(actions_from_spec, actions_from_spec):
-    if action1 == action2:
-        continue
+def compute_semantic_interactions(spec_actions):
 
-    template = ""
-    modname = f"{specname}_interaction"
-    template += f"---- MODULE {modname} ----\n"
-    template += f"EXTENDS {specname}\n"
-    template += "\n"
+    # Check semantic interaction between actions.
+    for action1, action2 in itertools.product(spec_actions, spec_actions):
+        if action1 == action2:
+            continue
 
-    template += "Action1 == TRUE\n"
-    template += f"Action2 == TRUE\n"
-    template += f"Action1pre == TRUE\n"
-    template += f"Action2pre == TRUE\n"
-    template += f"Action1PostExprs == TRUE\n"
-    template += f"Action2PostExprs == TRUE\n"
-    template += "\n"
+        template = ""
+        modname = f"{specname}_interaction"
+        template += f"---- MODULE {modname} ----\n"
+        template += f"EXTENDS {specname}\n"
+        template += "\n"
 
-    template += "InteractionInit == TypeOK\n"
-    template += "InteractionNext == Action1 \/ Action2\n"
-    template += "\n"
+        template += "Action1 == TRUE\n"
+        template += f"Action2 == TRUE\n"
+        template += f"Action1pre == TRUE\n"
+        template += f"Action2pre == TRUE\n"
+        template += f"Action1PostExprs == TRUE\n"
+        template += f"Action2PostExprs == TRUE\n"
+        template += "\n"
 
-    # Independence conditions.
-    indep_conds = [
-        "[][((ENABLED Action1 /\ Action2 ) => (Action1pre)')]_vars",
-        "[][((~ENABLED Action1 /\ Action2 ) => (~Action1pre)')]_vars",
-        "[][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars",
-        "[][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars",
-    ]
-    template += "\n"
-    template += "Independence == \n"
-    for indep_cond in indep_conds:
-        template += f"    /\ {indep_cond}\n"
+        template += "InteractionInit == TypeOK\n"
+        template += "InteractionNext == Action1 \/ Action2\n"
+        template += "\n"
 
-    # Commutativity conditions.
-    comm_conds = [
-        "[][Action1 => Action2PostExprs = Action2PostExprs']_vars",
-        "[][Action2 => Action1PostExprs = Action1PostExprs']_vars",
-    ]
-    template += "\n"
-    template += "Commutativity == \n"
-    for comm_cond in comm_conds:
-        template += f"    /\ {comm_cond}\n"
-    template += "\n"
-    template += "======"
+        # Independence conditions.
+        indep_conds = [
+            "[][((ENABLED Action1 /\ Action2 ) => (Action1pre)')]_vars",
+            "[][((~ENABLED Action1 /\ Action2 ) => (~Action1pre)')]_vars",
+            "[][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars",
+            "[][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars",
+        ]
+        template += "\n"
+        template += "Independence == \n"
+        for indep_cond in indep_conds:
+            template += f"    /\ {indep_cond}\n"
 
-    f = open(f"{specname}/{specname}_interaction.tla", "w")
-    f.write(template)
-    f.close()
+        # Commutativity conditions.
+        comm_conds = [
+            "[][Action1 => Action2PostExprs = Action2PostExprs']_vars",
+            "[][Action2 => Action1PostExprs = Action1PostExprs']_vars",
+        ]
+        template += "\n"
+        template += "Commutativity == \n"
+        for comm_cond in comm_conds:
+            template += f"    /\ {comm_cond}\n"
+        template += "\n"
+        template += "======"
 
-    fcfg = open(f"{specname}/{specname}_interaction.cfg", "w")
-    fcfg.write(f"INIT  InteractionInit\n")
-    fcfg.write(f"NEXT  InteractionNext\n")
-    fcfg.write(f"CONSTANTS\n")
-    fcfg.write(f"Action1 <- {action1}\n")
-    fcfg.write(f"Action2 <- {action2}\n")
-    fcfg.write(f"Action1pre <- {action1.replace('Action', '')}pre\n")
-    fcfg.write(f"Action2pre <- {action2.replace('Action', '')}pre\n")
-    fcfg.write(f"Action1PostExprs <- {action1.replace('Action', '')}PostExprs\n")
-    fcfg.write(f"Action2PostExprs <- {action2.replace('Action', '')}PostExprs\n")
-    fcfg.close()
+        f = open(f"{specname}/{specname}_interaction.tla", "w")
+        f.write(template)
+        f.close()
 
-    # Run TLC from the specs directory
-    print(f"Checking interaction with TLC for actions {action1} and {action2}")
-    cmd = f"java -cp ../tla2tools.jar tlc2.TLC {specname}_interaction"
-    subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=specname)
-    res = subproc.wait()
-    print(res)
+        fcfg = open(f"{specname}/{specname}_interaction.cfg", "w")
+        fcfg.write(f"INIT  InteractionInit\n")
+        fcfg.write(f"NEXT  InteractionNext\n")
+        fcfg.write(f"CONSTANTS\n")
+        fcfg.write(f"Action1 <- {action1}\n")
+        fcfg.write(f"Action2 <- {action2}\n")
+        fcfg.write(f"Action1pre <- {action1.replace('Action', '')}pre\n")
+        fcfg.write(f"Action2pre <- {action2.replace('Action', '')}pre\n")
+        fcfg.write(f"Action1PostExprs <- {action1.replace('Action', '')}PostExprs\n")
+        fcfg.write(f"Action2PostExprs <- {action2.replace('Action', '')}PostExprs\n")
+        
+        # TwoPhase.
+        fcfg.write("RM = {r1,r2,r3}\n")
 
+        fcfg.close()
 
+        # Run TLC from the specs directory
+        print(f"Checking interaction with TLC for actions {action1} and {action2}")
+        metadir = f"states/interaction_{action1}_{action2}"
+        cmd = f"java -cp ../tla2tools.jar tlc2.TLC -metadir {metadir} {specname}_interaction"
+        print(cmd)
+        subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=specname)
+        res = subproc.wait()
+        out_lines = subproc.stdout.readlines()
+        print(out_lines[-6:])
 
-    # print(template)
