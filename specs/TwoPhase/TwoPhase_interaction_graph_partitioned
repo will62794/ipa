@@ -2,12 +2,14 @@
 digraph {
 	rankdir=LR
     subgraph cluster_0 {
+        margin=30
         label="TM"
         TMRcvPrepared [shape=box style=rounded]
         TMAbort [shape=box style=rounded]
         TMCommit [shape=box style=rounded]
     }
 	subgraph cluster_1 {
+        margin=30
         label="RM"
 		RMRcvCommitMsg [shape=box style=rounded]
 		RMRcvAbortMsg [shape=box style=rounded]
