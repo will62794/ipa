@@ -28,5 +28,4 @@ digraph {
 	TMCommit -> TMAbort [label=tmState fontsize=12]
 	TMRcvPrepared -> TMCommit [label=tmPrepared fontsize=12]
 	TMAbort -> TMCommit [label=tmState fontsize=12]
-	dpi=300
 }

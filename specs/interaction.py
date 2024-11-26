@@ -169,3 +169,4 @@ def compute_semantic_interactions(spec_actions):
         out_lines = subproc.stdout.readlines()
         print(out_lines[-6:])
 
+compute_semantic_interactions(actions_from_spec)
