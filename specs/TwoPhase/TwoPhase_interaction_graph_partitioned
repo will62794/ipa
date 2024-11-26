@@ -17,7 +17,7 @@ digraph {
 		RMChooseToAbort [shape=box style=rounded]
 	}
 
-	RMPrepare -> TMRcvPrepared [label=msgsPrepared fontsize=12]
+	RMPrepare -> TMRcvPrepared [label=msgsPrepared fontsize=12,color=blue, fontcolor=blue]
 	TMAbort -> TMRcvPrepared [label=tmState fontsize=12]
 	TMCommit -> TMRcvPrepared [label=tmState fontsize=12]
 	RMChooseToAbort -> RMPrepare [label=rmState fontsize=12]
@@ -29,11 +29,11 @@ digraph {
 	RMPrepare -> RMRcvCommitMsg [label=rmState fontsize=12]
 	RMChooseToAbort -> RMRcvCommitMsg [label=rmState fontsize=12]
 	RMRcvAbortMsg -> RMRcvCommitMsg [label=rmState fontsize=12]
-	TMCommit -> RMRcvCommitMsg [label=msgsCommit fontsize=12]
+	TMCommit -> RMRcvCommitMsg [label=msgsCommit fontsize=12,color=blue, fontcolor=blue]
 	RMPrepare -> RMRcvAbortMsg [label=rmState fontsize=12]
 	RMChooseToAbort -> RMRcvAbortMsg [label=rmState fontsize=12]
 	RMRcvCommitMsg -> RMRcvAbortMsg [label=rmState fontsize=12]
-	TMAbort -> RMRcvAbortMsg [label=msgsAbort fontsize=12]
+	TMAbort -> RMRcvAbortMsg [label=msgsAbort fontsize=12,color=blue, fontcolor=blue]
 	TMCommit -> TMAbort [label=tmState fontsize=12]
 	TMRcvPrepared -> TMCommit [label=tmPrepared fontsize=12]
 	TMAbort -> TMCommit [label=tmState fontsize=12]
