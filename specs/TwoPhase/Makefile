@@ -1,2 +1,2 @@
 default:
-	dot -Tpng TwoPhase/TwoPhase_interaction_graph_partitioned -o TwoPhase/TwoPhase_interaction_graph_partitioned.png
+	dot -Tpng TwoPhase_interaction_graph_partitioned -o TwoPhase_interaction_graph_partitioned.png
