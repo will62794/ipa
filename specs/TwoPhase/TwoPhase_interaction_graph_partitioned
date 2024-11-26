@@ -3,14 +3,14 @@ digraph {
 	rankdir=LR
     subgraph cluster_0 {
         margin=30
-        label="TM"
+        label=<<font point-size="20">TM</font>>
         TMRcvPrepared [shape=box style=rounded]
         TMAbort [shape=box style=rounded]
         TMCommit [shape=box style=rounded]
     }
 	subgraph cluster_1 {
         margin=30
-        label="RM"
+        label=<<font point-size="20">RM</font>>
 		RMRcvCommitMsg [shape=box style=rounded]
 		RMRcvAbortMsg [shape=box style=rounded]
         RMPrepare [shape=box style=rounded]
