@@ -28,6 +28,8 @@ Quorum == {i \in SUBSET(Node) : Cardinality(i) * 2 > Cardinality(Node)}
 SendRequestVote(src, dst) == 
     /\ vote_request_msg' = vote_request_msg \cup {<<src, dst>> }
     /\ UNCHANGED <<voted,vote_msg,votes,leader,decided>>
+SendRequestVotepre == TRUE
+SendRequestVotePostExprs == vote_request_msg
 
 \* @type: (Str,Str) => Bool;
 SendVote(src, dst) == 
@@ -38,22 +40,30 @@ SendVote(src, dst) ==
     \* Delete vote request message.
     /\ vote_request_msg' = vote_request_msg \ {<<src,dst>>}
     /\ UNCHANGED <<votes, leader, decided>>
+SendVotepre == \E src,dst \in Node : ~voted[src] /\ <<dst,src>> \in vote_request_msg
+SendVotePostExprs == <<vote_msg, voted, vote_request_msg>>
 
 RecvVote(n, sender) == 
     /\ <<sender,n>> \in vote_msg
     /\ votes' = [votes EXCEPT ![n] = votes[n] \cup {sender}]
     /\ UNCHANGED <<vote_request_msg,voted,vote_msg,leader,decided>>
+RecvVotepre == \E n,sender \in Node : <<sender,n>> \in vote_msg
+RecvVotePostExprs == <<votes>>
 
 BecomeLeader(n, Q) == 
     /\ Q \subseteq votes[n]
     /\ leader' = [leader EXCEPT ![n] = TRUE]
     /\ UNCHANGED <<vote_request_msg,voted,vote_msg,votes,decided>>
+BecomeLeaderpre == \E n \in Node, Q \in Quorum : Q \subseteq votes[n]
+BecomeLeaderPostExprs == <<leader>>
 
 Decide(n, v) == 
     /\ leader[n]
     /\ decided[n] = {}
     /\ decided' = [decided EXCEPT ![n] = decided[n] \cup {v}]
     /\ UNCHANGED <<vote_request_msg,voted,vote_msg,votes,leader>>
+Decidepre == \E n \in Node, v \in Value : leader[n] /\ decided[n] = {}
+DecidePostExprs == <<decided>>
 
 Init == 
     /\ vote_request_msg = {}

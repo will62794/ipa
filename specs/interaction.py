@@ -116,12 +116,10 @@ def compute_semantic_interactions(spec_actions):
         template += "InteractionNext == Action1 \/ Action2\n"
         template += "\n"
 
-        # Independence conditions.
+        # Independence conditions (does Action 1 enable/disable Action 2).
         indep_conds = [
-            "[][((ENABLED Action1 /\ Action2 ) => (Action1pre)')]_vars",
-            "[][((~ENABLED Action1 /\ Action2 ) => (~Action1pre)')]_vars"
-            # "[][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars",
-            # "[][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars",
+            "[][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars",
+            "[][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars"
         ]
         template += "\n"
         template += "Independence == \n"
@@ -129,9 +127,9 @@ def compute_semantic_interactions(spec_actions):
             template += f"    /\ {indep_cond}\n"
 
         # Commutativity conditions.
+        # Does Action 1 commute with Action 2.
         comm_conds = [
             "[][Action1 => Action2PostExprs = Action2PostExprs']_vars",
-            # "[][Action2 => Action1PostExprs = Action1PostExprs']_vars",
         ]
         template += "\n"
         template += "Commutativity == \n"
@@ -157,6 +155,10 @@ def compute_semantic_interactions(spec_actions):
         
         # TwoPhase.
         fcfg.write("RM = {r1,r2,r3}\n")
+
+        # consensus_epr
+        fcfg.write("Node = {n1,n2}\n")
+        fcfg.write("Value = {v1,v2}\n")
 
         fcfg.write(f"PROPERTIES\n")
         fcfg.write(f" Independence\n")
@@ -195,8 +197,8 @@ def compute_semantic_interactions(spec_actions):
             # dot.edge(action2, action1, label=f"{','.join(interaction_vars)}", fontsize='12')
 
             # Find variables that action1 reads and action2 writes
-            interaction_vars = set(action_interaction_vars[action1.replace("Action", "")]["read_vars"]) & \
-                            set(action_interaction_vars[action2.replace("Action", "")]["write_vars"])
+            # Does Action1's writes interact with Action2's reads.
+            interaction_vars = set(action_interaction_vars[action1.replace("Action", "")]["write_vars"]) & set(action_interaction_vars[action2.replace("Action", "")]["read_vars"])
                             
             if interaction_vars:
                 # Create edge with interaction variables as label
@@ -204,7 +206,7 @@ def compute_semantic_interactions(spec_actions):
                 # dot.edge(action2, action1, 
                 #         label=f"{','.join(interaction_vars)}", 
                 #         fontsize='12')
-            dot.edge(action2.replace("Action", ""), action1.replace("Action", ""), label=label, fontsize='12')
+            dot.edge(action1.replace("Action", ""), action2.replace("Action", ""), label=label, fontsize='12')
 
 
         dot.attr(dpi='300')
