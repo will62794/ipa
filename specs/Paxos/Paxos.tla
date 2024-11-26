@@ -3,7 +3,7 @@
 (* This is a specification of the Paxos algorithm without explicit leaders *)
 (* or learners.  It refines the spec in Voting                             *)
 (***************************************************************************)
-EXTENDS Integers, FiniteSets, TLC, Randomization
+EXTENDS Integers, FiniteSets, TLC, Randomization, FiniteSetsExt
 -----------------------------------------------------------------------------
 (***************************************************************************)
 (* The constant parameters and the set Ballots are the same as in Voting.  *)
@@ -87,6 +87,17 @@ TypeOK == /\ maxBal \in [Acceptor -> Ballot \cup {-1}]
           /\ msgs2b \in SUBSET Message2b
           /\ chosen \in SUBSET Value
 
+kOrSmallerSubset(k, S) == UNION {(kSubset(n, S)) : n \in 0..k}
+
+TypeOKRandom == 
+    /\ maxBal \in [Acceptor -> Ballot \cup {-1}]
+    /\ maxVBal \in [Acceptor -> Ballot \cup {-1}]
+    /\ maxVal \in [Acceptor -> Value \cup {None}]
+    /\ msgs1a \in SUBSET Message1a
+    /\ msgs1b \in RandomSetOfSubsets(6, 4, Message1b)
+    /\ msgs2a \in SUBSET Message2a
+    /\ msgs2b \in RandomSetOfSubsets(6, 4, Message2b)
+    /\ chosen \in SUBSET Value
 
 NumRandSubsets == 35
 
@@ -132,6 +143,8 @@ Phase1a(b) ==
     /\ UNCHANGED <<maxBal, maxVBal,maxVal,msgs1b,msgs2a,msgs2b,chosen>>
 Phase1aRVars == <<msgs1a>>
 Phase1aWVars == <<msgs1a>>
+Phase1apre == TRUE
+Phase1aPostExprs == <<msgs1a>>
 
                 
 (***************************************************************************)
@@ -140,15 +153,19 @@ Phase1aWVars == <<msgs1a>>
 (* b and sends a phase 1b message to the leader containing the values of   *)
 (* maxVBal[a] and maxVal[a].                                               *)
 (***************************************************************************)
-Phase1b(a) == 
+Phase1b(a, b) == 
     \E m \in msgs1a : 
         /\ m.type = "1a"
+        /\ m.bal = b
         /\ m.bal > maxBal[a]
         /\ maxBal' = [maxBal EXCEPT ![a] = m.bal]
         /\ msgs1b' = msgs1b \cup {[type |-> "1b", acc |-> a, bal |-> m.bal, mbal |-> maxVBal[a], mval |-> maxVal[a]]}
         /\ UNCHANGED <<maxVBal, maxVal,msgs1a,msgs2a,msgs2b,chosen>>
 Phase1bRVars == <<msgs1a, msgs1b, maxVBal, maxVal>>
 Phase1bWVars == <<msgs1b, maxBal>>
+Phase1bpre == maxBal
+\* Phase1bPostExprs == <<maxBal, maxVBal, maxVal, msgs1b>>
+Phase1bPostExprs == <<TRUE>>
 
 (***************************************************************************)
 (* The Phase2a(b, v) action can be performed by the ballot b leader if two *)
@@ -189,6 +206,8 @@ Phase2a(b, v) ==
   /\ UNCHANGED <<maxBal, maxVBal, maxVal,msgs1a,msgs1b,msgs2b,chosen>>
 Phase2aRVars == <<msgs2a, msgs1b>>
 Phase2aWVars == <<msgs2a>>
+Phase2apre == <<msgs2a, msgs1b>>
+Phase2aPostExprs == <<msgs2a>>
 
 (***************************************************************************)
 (* The Phase2b(a) action is performed by acceptor a upon receipt of a      *)
@@ -199,9 +218,10 @@ Phase2aWVars == <<msgs2a>>
 (* phase 2b message announcing its vote.  It also sets maxBal[a] to the    *)
 (* message's.  ballot number                                               *)
 (***************************************************************************)
-Phase2b(a) == 
+Phase2b(a, b) == 
     \E m \in msgs2a : 
         /\ m.type = "2a"
+        /\ m.bal = b
         /\ m.bal \geq maxBal[a]
         /\ maxBal' = [maxBal EXCEPT ![a] = m.bal] 
         /\ maxVBal' = [maxVBal EXCEPT ![a] = m.bal] 
@@ -210,6 +230,8 @@ Phase2b(a) ==
         /\ UNCHANGED <<msgs1a,msgs1b,msgs2a,chosen>>
 Phase2bRVars == <<msgs2a, maxBal>>
 Phase2bWVars == <<maxBal, maxVBal, maxVal,msgs2b>>
+Phase2bpre == <<msgs2a, maxBal>>
+Phase2bPostExprs == <<maxBal, maxVBal, maxVal, msgs2b>>
 
 votes == [a \in Acceptor |->  
            {<<m.bal, m.val>> : m \in {mm \in msgs2b: /\ mm.type = "2b"
@@ -227,6 +249,8 @@ Learn(val) ==
     /\ UNCHANGED <<maxBal, maxVBal, maxVal, msgs1a, msgs1b, msgs2a, msgs2b>>
 LearnRVars == <<chosen, msgs2b>>
 LearnWVars == <<chosen>>
+Learnpre == <<chosen, msgs2b>>
+LearnPostExprs == <<chosen>>
 
 (***************************************************************************)
 (* The actions that can be performed in the next state.                   *)
@@ -239,8 +263,8 @@ LearnWVars == <<chosen>>
 
 Phase1aAction == TRUE /\ \E b \in Ballot : Phase1a(b)
 Phase2aAction == TRUE /\ \E b \in Ballot : \E v \in Value : Phase2a(b, v)
-Phase1bAction == TRUE /\ \E a \in Acceptor : Phase1b(a) 
-Phase2bAction == TRUE /\ \E a \in Acceptor : Phase2b(a)
+Phase1bAction == TRUE /\ \E a \in Acceptor, b \in Ballot : Phase1b(a, b) 
+Phase2bAction == TRUE /\ \E a \in Acceptor, b \in Ballot : Phase2b(a, b)
 LearnAction == TRUE /\ \E v \in Value : Learn(v)
 
 (***************************************************************************)
