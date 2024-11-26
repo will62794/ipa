@@ -91,7 +91,8 @@ dot.render(f'{specname}/{specname}_interaction_graph', view=False, format='png')
 #     /\ [][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars
 
 def compute_semantic_interactions(spec_actions):
-
+    print("Computing semantic interactions")
+    semantic_interaction_edges = []
     # Check semantic interaction between actions.
     for action1, action2 in itertools.product(spec_actions, spec_actions):
         if action1 == action2:
@@ -118,9 +119,9 @@ def compute_semantic_interactions(spec_actions):
         # Independence conditions.
         indep_conds = [
             "[][((ENABLED Action1 /\ Action2 ) => (Action1pre)')]_vars",
-            "[][((~ENABLED Action1 /\ Action2 ) => (~Action1pre)')]_vars",
-            "[][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars",
-            "[][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars",
+            "[][((~ENABLED Action1 /\ Action2 ) => (~Action1pre)')]_vars"
+            # "[][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars",
+            # "[][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars",
         ]
         template += "\n"
         template += "Independence == \n"
@@ -130,7 +131,7 @@ def compute_semantic_interactions(spec_actions):
         # Commutativity conditions.
         comm_conds = [
             "[][Action1 => Action2PostExprs = Action2PostExprs']_vars",
-            "[][Action2 => Action1PostExprs = Action1PostExprs']_vars",
+            # "[][Action2 => Action1PostExprs = Action1PostExprs']_vars",
         ]
         template += "\n"
         template += "Commutativity == \n"
@@ -157,16 +158,57 @@ def compute_semantic_interactions(spec_actions):
         # TwoPhase.
         fcfg.write("RM = {r1,r2,r3}\n")
 
+        fcfg.write(f"PROPERTIES\n")
+        fcfg.write(f" Independence\n")
+        fcfg.write(f" Commutativity\n")
+
         fcfg.close()
 
         # Run TLC from the specs directory
         print(f"Checking interaction with TLC for actions {action1} and {action2}")
         metadir = f"states/interaction_{action1}_{action2}"
-        cmd = f"java -cp ../tla2tools.jar tlc2.TLC -metadir {metadir} {specname}_interaction"
+        cmd = f"java -cp ../tla2tools.jar tlc2.TLC -deadlock -metadir {metadir} {specname}_interaction"
         print(cmd)
         subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=specname)
         res = subproc.wait()
         out_lines = subproc.stdout.readlines()
-        print(out_lines[-6:])
+        interaction = True
+        for line in (out_lines):
+            if "No error has been found" in str(line):
+                interaction = False
+        if interaction:
+            print(f"Semantic interaction between {action1} and {action2}")
+            semantic_interaction_edges.append((action1, action2))
+
+        print("----")
+
+        # Re-generate DOT digraph that reports an edge between semantically interacting action nodes.
+        dot = graphviz.Digraph(comment='Semantic Action Interaction Graph')
+        dot.attr(rankdir='LR')
+        # dot.attr(nodesep='0.1')
+
+        # Add nodes for each action
+        for action in actions_from_spec:
+            dot.node(action.replace("Action", ""), shape='box', style='rounded')
+        
+        for action1, action2 in semantic_interaction_edges:
+            # dot.edge(action2, action1, label=f"{','.join(interaction_vars)}", fontsize='12')
+
+            # Find variables that action1 reads and action2 writes
+            interaction_vars = set(action_interaction_vars[action1.replace("Action", "")]["read_vars"]) & \
+                            set(action_interaction_vars[action2.replace("Action", "")]["write_vars"])
+                            
+            if interaction_vars:
+                # Create edge with interaction variables as label
+                label = f"{','.join(interaction_vars)}"
+                # dot.edge(action2, action1, 
+                #         label=f"{','.join(interaction_vars)}", 
+                #         fontsize='12')
+            dot.edge(action2.replace("Action", ""), action1.replace("Action", ""), label=label, fontsize='12')
+
+
+        dot.attr(dpi='300')
+        dot.render(f'{specname}/{specname}_semantic_interaction_graph', view=False)
+        dot.render(f'{specname}/{specname}_semantic_interaction_graph', view=False, format='png')
 
 compute_semantic_interactions(actions_from_spec)

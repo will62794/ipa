@@ -1,4 +1,4 @@
-// Action Interaction Graph
+// Semantic Action Interaction Graph
 digraph {
 	rankdir=LR
 	TMRcvPrepared [shape=box style=rounded]
@@ -17,13 +17,7 @@ digraph {
 	RMPrepare -> RMChooseToAbort [label=rmState fontsize=12]
 	RMRcvCommitMsg -> RMChooseToAbort [label=rmState fontsize=12]
 	RMRcvAbortMsg -> RMChooseToAbort [label=rmState fontsize=12]
-	RMPrepare -> RMRcvCommitMsg [label=rmState fontsize=12]
-	RMChooseToAbort -> RMRcvCommitMsg [label=rmState fontsize=12]
-	RMRcvAbortMsg -> RMRcvCommitMsg [label=rmState fontsize=12]
 	TMCommit -> RMRcvCommitMsg [label=msgsCommit fontsize=12]
-	RMPrepare -> RMRcvAbortMsg [label=rmState fontsize=12]
-	RMChooseToAbort -> RMRcvAbortMsg [label=rmState fontsize=12]
-	RMRcvCommitMsg -> RMRcvAbortMsg [label=rmState fontsize=12]
 	TMAbort -> RMRcvAbortMsg [label=msgsAbort fontsize=12]
 	TMCommit -> TMAbort [label=tmState fontsize=12]
 	TMRcvPrepared -> TMCommit [label=tmPrepared fontsize=12]

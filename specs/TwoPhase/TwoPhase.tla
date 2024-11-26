@@ -114,6 +114,8 @@ TMRcvPrepared(rm) ==
   /\ UNCHANGED <<rmState, tmState, msgsPrepared, msgsCommit, msgsAbort>>
 TMRcvPreparedRVars == <<tmState, msgsPrepared, tmPrepared>>
 TMRcvPreparedWVars == <<tmPrepared>>
+TMRcvPreparedpre == \E rm \in RM :tmState = "init" /\ [type |-> "Prepared", rm |-> rm] \in msgsPrepared
+TMRcvPreparedPostExprs == tmPrepared\* \cup {rm}
 
 TMCommit ==
   (*************************************************************************)
@@ -127,6 +129,8 @@ TMCommit ==
   /\ UNCHANGED <<rmState, tmPrepared, msgsPrepared, msgsAbort>>
 TMCommitRVars == <<tmState, tmPrepared, msgsCommit>>
 TMCommitWVars == <<tmState, msgsCommit>>
+TMCommitpre == tmState = "init" /\ tmPrepared = RM
+TMCommitPostExprs == <<"committed", msgsCommit \cup {[type |-> "Commit"]}>>
 
 TMAbort ==
   (*************************************************************************)
@@ -138,6 +142,8 @@ TMAbort ==
   /\ UNCHANGED <<rmState, tmPrepared, msgsPrepared, msgsCommit>>
 TMAbortRVars == <<tmState, msgsAbort>>
 TMAbortWVars == <<tmState, msgsAbort>>
+TMAbortpre == tmState = "init"
+TMAbortPostExprs == <<"aborted", msgsAbort \cup {[type |-> "Abort"]}>>
 
 RMPrepare(rm) == 
   (*************************************************************************)
@@ -149,6 +155,8 @@ RMPrepare(rm) ==
   /\ UNCHANGED <<tmState, tmPrepared, msgsCommit, msgsAbort>>
 RMPrepareRVars == <<rmState, msgsPrepared>>
 RMPrepareWVars == <<rmState, msgsPrepared>>
+RMPreparepre == \E rm \in RM : rmState[rm] = "working"
+RMPreparePostExprs == msgsPrepared \*\cup {[type |-> "Prepared", rm |-> rm]}
 
 RMChooseToAbort(rm) ==
   (*************************************************************************)
@@ -160,6 +168,8 @@ RMChooseToAbort(rm) ==
   /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsCommit, msgsAbort>>
 RMChooseToAbortRVars == <<rmState>>
 RMChooseToAbortWVars == <<rmState>>
+RMChooseToAbortpre == \E rm \in RM : rmState[rm] = "working"
+RMChooseToAbortPostExprs == "aborted"
 
 RMRcvCommitMsg(rm) ==
   (*************************************************************************)
@@ -170,6 +180,8 @@ RMRcvCommitMsg(rm) ==
   /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsCommit, msgsAbort>>
 RMRcvCommitMsgRVars == <<rmState, msgsCommit>>
 RMRcvCommitMsgWVars == <<rmState>>
+RMRcvCommitMsgpre == [type |-> "Commit"] \in msgsCommit
+RMRcvCommitMsgPostExprs == "committed"
 
 RMRcvAbortMsg(rm) ==
   (*************************************************************************)
@@ -180,6 +192,8 @@ RMRcvAbortMsg(rm) ==
   /\ UNCHANGED <<tmState, tmPrepared, msgsPrepared, msgsCommit, msgsAbort>>
 RMRcvAbortMsgRVars == <<rmState, msgsAbort>>
 RMRcvAbortMsgWVars == <<rmState>>
+RMRcvAbortMsgpre == [type |-> "Abort"] \in msgsAbort
+RMRcvAbortMsgPostExprs == "aborted"
 
 TMRcvPreparedAction == TRUE /\ \E rm \in RM : TMRcvPrepared(rm) 
 RMPrepareAction == TRUE /\ \E rm \in RM : RMPrepare(rm) 
