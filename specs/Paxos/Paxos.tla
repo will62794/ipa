@@ -94,9 +94,9 @@ TypeOKRandom ==
     /\ maxVBal \in [Acceptor -> Ballot \cup {-1}]
     /\ maxVal \in [Acceptor -> Value \cup {None}]
     /\ msgs1a \in SUBSET Message1a
-    /\ msgs1b \in RandomSetOfSubsets(6, 4, Message1b)
+    /\ msgs1b \in RandomSetOfSubsets(5, 3, Message1b)
     /\ msgs2a \in SUBSET Message2a
-    /\ msgs2b \in RandomSetOfSubsets(6, 4, Message2b)
+    /\ msgs2b \in RandomSetOfSubsets(5, 3, Message2b)
     /\ chosen \in SUBSET Value
 
 NumRandSubsets == 35
@@ -163,7 +163,7 @@ Phase1b(a, b) ==
         /\ UNCHANGED <<maxVBal, maxVal,msgs1a,msgs2a,msgs2b,chosen>>
 Phase1bRVars == <<msgs1a, msgs1b, maxVBal, maxVal>>
 Phase1bWVars == <<msgs1b, maxBal>>
-Phase1bpre == maxBal
+Phase1bpre == \E a \in Acceptor, b \in Ballot : \E m \in msgs1a : m.type = "1a" /\ m.bal = b /\ m.bal > maxBal[a]
 \* Phase1bPostExprs == <<maxBal, maxVBal, maxVal, msgs1b>>
 Phase1bPostExprs == <<TRUE>>
 
@@ -206,7 +206,7 @@ Phase2a(b, v) ==
   /\ UNCHANGED <<maxBal, maxVBal, maxVal,msgs1a,msgs1b,msgs2b,chosen>>
 Phase2aRVars == <<msgs2a, msgs1b>>
 Phase2aWVars == <<msgs2a>>
-Phase2apre == <<msgs2a, msgs1b>>
+Phase2apre == \E b \in Ballot : ~\E m \in msgs2a : m.type = "2a" /\ m.bal = b
 Phase2aPostExprs == <<msgs2a>>
 
 (***************************************************************************)
@@ -230,7 +230,7 @@ Phase2b(a, b) ==
         /\ UNCHANGED <<msgs1a,msgs1b,msgs2a,chosen>>
 Phase2bRVars == <<msgs2a, maxBal>>
 Phase2bWVars == <<maxBal, maxVBal, maxVal,msgs2b>>
-Phase2bpre == <<msgs2a, maxBal>>
+Phase2bpre == \E a \in Acceptor, b \in Ballot : \E m \in msgs2a : m.type = "2a" /\ m.bal = b /\ m.bal \geq maxBal[a]
 Phase2bPostExprs == <<maxBal, maxVBal, maxVal, msgs2b>>
 
 votes == [a \in Acceptor |->  
@@ -249,7 +249,7 @@ Learn(val) ==
     /\ UNCHANGED <<maxBal, maxVBal, maxVal, msgs1a, msgs1b, msgs2a, msgs2b>>
 LearnRVars == <<chosen, msgs2b>>
 LearnWVars == <<chosen>>
-Learnpre == <<chosen, msgs2b>>
+Learnpre == \E val \in Value : val \in {v \in Value : \E b \in Ballot : ChosenAt(b, v)}
 LearnPostExprs == <<chosen>>
 
 (***************************************************************************)

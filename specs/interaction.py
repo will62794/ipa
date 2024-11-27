@@ -152,12 +152,25 @@ def compute_semantic_interactions(spec_actions):
         fcfg.write(f"Action2pre <- {action2.replace('Action', '')}pre\n")
         fcfg.write(f"Action1PostExprs <- {action1.replace('Action', '')}PostExprs\n")
         fcfg.write(f"Action2PostExprs <- {action2.replace('Action', '')}PostExprs\n")
-        
+
+        if "Paxos" in specname:
+            fcfg.write("TypeOK <- TypeOKRandom\n")
+
         # TwoPhase.
         fcfg.write("RM = {r1,r2,r3}\n")
 
         # consensus_epr
-        fcfg.write("Node = {n1,n2}\n")
+        if "consensus_epr" in specname: 
+            fcfg.write("\* consensus_epr\n")
+            fcfg.write("Node = {n1,n2}\n")
+            fcfg.write("Value = {v1,v2}\n")
+
+        # Paxos
+        if "Paxos" in specname:
+            fcfg.write("\* Paxos\n")
+            fcfg.write("Acceptor = {a1,a2}\n")
+            fcfg.write("Ballot = {0,1}\n")
+            fcfg.write("None = None\n")
         fcfg.write("Value = {v1,v2}\n")
 
         fcfg.write(f"PROPERTIES\n")
@@ -169,7 +182,7 @@ def compute_semantic_interactions(spec_actions):
         # Run TLC from the specs directory
         print(f"Checking interaction with TLC for actions {action1} and {action2}")
         metadir = f"states/interaction_{action1}_{action2}"
-        cmd = f"java -cp ../tla2tools.jar tlc2.TLC -deadlock -metadir {metadir} {specname}_interaction"
+        cmd = f"java -cp /usr/local/tla2tools-v1.8.jar tlc2.TLC -noGenerateSpecTE -deadlock -metadir {metadir} {specname}_interaction"
         print(cmd)
         subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=specname)
         res = subproc.wait()
@@ -199,7 +212,7 @@ def compute_semantic_interactions(spec_actions):
             # Find variables that action1 reads and action2 writes
             # Does Action1's writes interact with Action2's reads.
             interaction_vars = set(action_interaction_vars[action1.replace("Action", "")]["write_vars"]) & set(action_interaction_vars[action2.replace("Action", "")]["read_vars"])
-                            
+            label = ""
             if interaction_vars:
                 # Create edge with interaction variables as label
                 label = f"{','.join(interaction_vars)}"

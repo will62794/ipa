@@ -209,6 +209,31 @@ RMAtomic(rm) ==
     /\ msgsPrepared' = msgsPrepared \cup {[type |-> "Prepared", rm |-> rm]}
     /\ UNCHANGED <<tmState, tmPrepared, rmState, msgsCommit, msgsAbort>>
 
+InitRM ==   
+  (*************************************************************************)
+  (* The initial predicate.                                                *)
+  (*************************************************************************)
+  /\ rmState = [rm \in RM |-> "working"]
+  /\ tmState = "init"
+  /\ tmPrepared   = {}
+  /\ msgsPrepared = {}
+  /\ msgsCommit \in SUBSET [type : {"Commit"}]
+  /\ msgsAbort \in SUBSET [type : {"Abort"}]
+
+NextRM == 
+  \/ RMPrepareAction
+  \/ RMChooseToAbortAction
+  \/ RMRcvCommitMsgAction
+  \/ RMRcvAbortMsgAction
+
+\* Checks that all transitions are valid RMAtomic actions.
+RMInteractionPreserving == [][
+    \E rm \in RM : 
+            /\ msgsCommit = {} 
+            /\ msgsAbort = {}
+            /\ msgsPrepared' = msgsPrepared \cup {[type |-> "Prepared", rm |-> rm]}
+    ]_<<msgsCommit, msgsAbort, msgsPrepared>>
+
 Next ==
   \/ TMCommitAction 
   \/ TMAbortAction

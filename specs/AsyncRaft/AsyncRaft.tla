@@ -542,39 +542,39 @@ HandleAppendEntriesResponse(m) ==
 \* RestartAction == TRUE /\ \E i \in Server : Restart(i)
 RequestVoteAction == TRUE /\ \E i \in Server : RequestVote(i)
 \* UpdateTermAction == TRUE /\ \E m \in requestVoteRequestMsgs \cup requestVoteResponseMsgs \cup appendEntriesRequestMsgs \cup appendEntriesResponseMsgs : UpdateTerm(m, m.mterm, m.mdest)
-UpdateTermRVReqAction == TRUE /\ \E m \in requestVoteRequestMsgs : UpdateTermRVReq(m.mterm, m.mdest)
-UpdateTermRVResAction == TRUE /\ \E m \in requestVoteResponseMsgs : UpdateTermRVRes(m.mterm, m.mdest)
-UpdateTermAEReqAction == TRUE /\ \E m \in appendEntriesRequestMsgs : UpdateTermAEReq(m.mterm, m.mdest)
-UpdateTermAEResAction == TRUE /\ \E m \in appendEntriesResponseMsgs : UpdateTermAERes(m.mterm, m.mdest)
+\* UpdateTermRVReqAction == TRUE /\ \E m \in requestVoteRequestMsgs : UpdateTermRVReq(m.mterm, m.mdest)
+\* UpdateTermRVResAction == TRUE /\ \E m \in requestVoteResponseMsgs : UpdateTermRVRes(m.mterm, m.mdest)
+\* UpdateTermAEReqAction == TRUE /\ \E m \in appendEntriesRequestMsgs : UpdateTermAEReq(m.mterm, m.mdest)
+\* UpdateTermAEResAction == TRUE /\ \E m \in appendEntriesResponseMsgs : UpdateTermAERes(m.mterm, m.mdest)
 BecomeLeaderAction == TRUE /\ \E i \in Server : BecomeLeader(i)
-ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
-AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
-AppendEntriesAction == TRUE /\ \E i,j \in Server : AppendEntries(i, j)
+\* ClientRequestAction == TRUE /\ \E i \in Server : ClientRequest(i)
+\* AdvanceCommitIndexAction == TRUE /\ \E i \in Server : AdvanceCommitIndex(i)
+\* AppendEntriesAction == TRUE /\ \E i,j \in Server : AppendEntries(i, j)
 HandleRequestVoteRequestAction == \E m \in requestVoteRequestMsgs : HandleRequestVoteRequest(m)
 HandleRequestVoteResponseAction == \E m \in requestVoteResponseMsgs : HandleRequestVoteResponse(m)
-RejectAppendEntriesRequestAction == \E m \in appendEntriesRequestMsgs : RejectAppendEntriesRequest(m)
-AcceptAppendEntriesRequestAppendAction == \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestAppend(m)
+\* RejectAppendEntriesRequestAction == \E m \in appendEntriesRequestMsgs : RejectAppendEntriesRequest(m)
+\* AcceptAppendEntriesRequestAppendAction == \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestAppend(m)
 \* AcceptAppendEntriesRequestTruncateAction == TRUE /\ \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestTruncate(m)
-AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestLearnCommit(m)
-HandleAppendEntriesResponseAction == \E m \in appendEntriesResponseMsgs : HandleAppendEntriesResponse(m)
+\* AcceptAppendEntriesRequestLearnCommitAction == \E m \in appendEntriesRequestMsgs : AcceptAppendEntriesRequestLearnCommit(m)
+\* HandleAppendEntriesResponseAction == \E m \in appendEntriesResponseMsgs : HandleAppendEntriesResponse(m)
 
 \* Defines how the variables may transition.
 Next == 
     \/ RequestVoteAction
-    \/ UpdateTermRVReqAction
-    \/ UpdateTermRVResAction
-    \/ UpdateTermAEReqAction
-    \/ UpdateTermAEResAction
+    \* \/ UpdateTermRVReqAction
+    \* \/ UpdateTermRVResAction
+    \* \/ UpdateTermAEReqAction
+    \* \/ UpdateTermAEResAction
     \/ HandleRequestVoteRequestAction
     \/ HandleRequestVoteResponseAction
     \/ BecomeLeaderAction
-    \/ ClientRequestAction
-    \/ AppendEntriesAction
-    \/ RejectAppendEntriesRequestAction
-    \/ AcceptAppendEntriesRequestAppendAction
-    \/ AcceptAppendEntriesRequestLearnCommitAction
-    \/ HandleAppendEntriesResponseAction 
-    \/ AdvanceCommitIndexAction
+    \* \/ ClientRequestAction
+    \* \/ AppendEntriesAction
+    \* \/ RejectAppendEntriesRequestAction
+    \* \/ AcceptAppendEntriesRequestAppendAction
+    \* \/ AcceptAppendEntriesRequestLearnCommitAction
+    \* \/ HandleAppendEntriesResponseAction 
+    \* \/ AdvanceCommitIndexAction
     \* \/ AcceptAppendEntriesRequestTruncateAction \* (DISABLE FOR NOW FOR SMALLER PROOF)
 
 NextUnchanged == UNCHANGED vars
