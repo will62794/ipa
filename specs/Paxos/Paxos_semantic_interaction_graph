@@ -6,16 +6,11 @@ digraph {
 	Phase1b [shape=box style=rounded]
 	Phase2b [shape=box style=rounded]
 	Learn [shape=box style=rounded]
-	Phase1a -> Phase2a [label="" fontsize=12]
 	Phase1a -> Phase1b [label=msgs1a fontsize=12]
-	Phase1a -> Phase2b [label="" fontsize=12]
-	Phase1a -> Learn [label="" fontsize=12]
-	Phase2a -> Phase1a [label="" fontsize=12]
-	Phase2a -> Phase1b [label="" fontsize=12]
 	Phase2a -> Phase2b [label=msgs2a fontsize=12]
-	Phase2a -> Learn [label="" fontsize=12]
-	Phase1b -> Phase1a [label="" fontsize=12]
 	Phase1b -> Phase2a [label=msgs1b fontsize=12]
 	Phase1b -> Phase2b [label=maxBal fontsize=12]
+	Phase2b -> Phase1b [label="maxVal,maxBal,maxVBal" fontsize=12]
+	Phase2b -> Learn [label=msgs2b fontsize=12]
 	dpi=300
 }

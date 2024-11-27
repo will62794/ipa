@@ -251,7 +251,7 @@ ChosenAt(b, v) == \E Q \in Quorum : \A a \in Q : VotedFor(a, b, v)
 \* chosen == {v \in Value : \E b \in Ballot : ChosenAt(b, v)}
 
 Learn(val) == 
-    /\ val \in {v \in Value : \E b \in Ballot : ChosenAt(b, v)}
+    /\ val \in {v \in Value : \E b \in Ballot : ChosenAt(b, v) /\ msgs2b = msgs2b}
     /\ chosen' = chosen \cup {val}
     /\ UNCHANGED <<maxBal, maxVBal, maxVal, msgs1a, msgs1b, msgs2a, msgs2b>>
 LearnRVars == <<chosen, msgs2b>>

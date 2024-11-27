@@ -118,8 +118,9 @@ def compute_semantic_interactions(spec_actions):
 
         # Independence conditions (does Action 1 enable/disable Action 2).
         indep_conds = [
-            "[][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars",
-            "[][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars"
+            "[][(Action1 ) => (Action2pre <=> Action2pre')]_vars",
+            # "[][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars",
+            # "[][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars"
         ]
         template += "\n"
         template += "Independence == \n"
@@ -190,10 +191,12 @@ def compute_semantic_interactions(spec_actions):
         subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=specname)
         res = subproc.wait()
         out_lines = subproc.stdout.readlines()
-        interaction = True
+        interaction = False
         for line in (out_lines):
-            if "No error has been found" in str(line):
-                interaction = False
+            if "is violated" in str(line):
+                interaction = True
+            # if "No error has been found" in str(line):
+                # interaction = False
         if interaction:
             print(f"Semantic interaction between {action1} and {action2}")
             semantic_interaction_edges.append((action1, action2))
