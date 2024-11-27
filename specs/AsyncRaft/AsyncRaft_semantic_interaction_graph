@@ -1,0 +1,21 @@
+// Semantic Action Interaction Graph
+digraph {
+	rankdir=LR
+	RequestVote [shape=box style=rounded]
+	BecomeLeader [shape=box style=rounded]
+	HandleRequestVoteRequest [shape=box style=rounded]
+	HandleRequestVoteResponse [shape=box style=rounded]
+	RequestVote -> BecomeLeader [label="state,votesGranted" fontsize=12]
+	RequestVote -> HandleRequestVoteRequest [label="votedFor,requestVoteRequestMsgs,currentTerm" fontsize=12]
+	RequestVote -> HandleRequestVoteResponse [label="currentTerm,votesGranted" fontsize=12]
+	BecomeLeader -> RequestVote [label=state fontsize=12]
+	BecomeLeader -> HandleRequestVoteRequest [label=state fontsize=12]
+	BecomeLeader -> HandleRequestVoteResponse [label=state fontsize=12]
+	HandleRequestVoteRequest -> RequestVote [label="votedFor,requestVoteRequestMsgs" fontsize=12]
+	HandleRequestVoteRequest -> BecomeLeader [label="votedFor,requestVoteRequestMsgs" fontsize=12]
+	HandleRequestVoteRequest -> HandleRequestVoteResponse [label=requestVoteResponseMsgs fontsize=12]
+	HandleRequestVoteResponse -> RequestVote [label=votesGranted fontsize=12]
+	HandleRequestVoteResponse -> BecomeLeader [label=votesGranted fontsize=12]
+	HandleRequestVoteResponse -> HandleRequestVoteRequest [label=requestVoteResponseMsgs fontsize=12]
+	dpi=300
+}
