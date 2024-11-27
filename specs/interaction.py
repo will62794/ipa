@@ -182,7 +182,10 @@ def compute_semantic_interactions(spec_actions):
         # Run TLC from the specs directory
         print(f"Checking interaction with TLC for actions {action1} and {action2}")
         metadir = f"states/interaction_{action1}_{action2}"
-        cmd = f"java -cp /usr/local/tla2tools-v1.8.jar tlc2.TLC -noGenerateSpecTE -deadlock -metadir {metadir} {specname}_interaction"
+        simulate = ""
+        if "Paxos" in specname:
+            simulate = "-simulate num=10000 -depth 4"
+        cmd = f"java -cp /usr/local/tla2tools-v1.8.jar tlc2.TLC -workers 4 -maxSetSize 10000000 {simulate} -noGenerateSpecTE -deadlock -metadir {metadir} {specname}_interaction"
         print(cmd)
         subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=specname)
         res = subproc.wait()

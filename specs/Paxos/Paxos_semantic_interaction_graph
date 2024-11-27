@@ -17,14 +17,5 @@ digraph {
 	Phase1b -> Phase1a [label="" fontsize=12]
 	Phase1b -> Phase2a [label=msgs1b fontsize=12]
 	Phase1b -> Phase2b [label=maxBal fontsize=12]
-	Phase1b -> Learn [label="" fontsize=12]
-	Phase2b -> Phase1a [label="" fontsize=12]
-	Phase2b -> Phase2a [label="" fontsize=12]
-	Phase2b -> Phase1b [label="maxVal,maxVBal,maxBal" fontsize=12]
-	Phase2b -> Learn [label=msgs2b fontsize=12]
-	Learn -> Phase1a [label="" fontsize=12]
-	Learn -> Phase2a [label="" fontsize=12]
-	Learn -> Phase1b [label="" fontsize=12]
-	Learn -> Phase2b [label="" fontsize=12]
 	dpi=300
 }

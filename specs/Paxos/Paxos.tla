@@ -206,7 +206,14 @@ Phase2a(b, v) ==
   /\ UNCHANGED <<maxBal, maxVBal, maxVal,msgs1a,msgs1b,msgs2b,chosen>>
 Phase2aRVars == <<msgs2a, msgs1b>>
 Phase2aWVars == <<msgs2a>>
-Phase2apre == \E b \in Ballot : ~\E m \in msgs2a : m.type = "2a" /\ m.bal = b
+Phase2apre == 
+    /\ \E b \in Ballot : ~\E m \in msgs2a : m.type = "2a" /\ m.bal = b
+    /\ \E b \in Ballot : \E v \in Value : \E Q \in Quorum :
+        /\ \A a \in Q : \E m \in Q1b(Q,b) : m.acc = a 
+        /\ \/ Q1bv(Q, b) = {}
+           \/ \E m \in Q1bv(Q, b) : 
+                /\ m.mval = v
+                /\ \A mm \in Q1bv(Q, b) : m.mbal \geq mm.mbal 
 Phase2aPostExprs == <<msgs2a>>
 
 (***************************************************************************)

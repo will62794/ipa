@@ -8,7 +8,7 @@ digraph {
 	Learn [shape=box style=rounded]
 	Phase1b -> Phase2a [label=msgs1b fontsize=12]
 	Phase1a -> Phase1b [label=msgs1a fontsize=12]
-	Phase2b -> Phase1b [label="maxVal,maxVBal,maxBal" fontsize=12]
+	Phase2b -> Phase1b [label="maxBal,maxVBal,maxVal" fontsize=12]
 	Phase2a -> Phase2b [label=msgs2a fontsize=12]
 	Phase1b -> Phase2b [label=maxBal fontsize=12]
 	Phase2b -> Learn [label=msgs2b fontsize=12]
