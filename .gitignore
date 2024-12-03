@@ -6,3 +6,5 @@ states/
 logout
 *_interaction.cfg
 *_interaction.tla
+.tlacache/
+*.toolbox/
