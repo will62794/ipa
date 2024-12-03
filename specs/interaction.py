@@ -118,9 +118,7 @@ def compute_semantic_interactions(spec_actions):
 
         # Independence conditions (does Action 1 enable/disable Action 2).
         indep_conds = [
-            "[][(Action1 ) => (Action2pre <=> Action2pre')]_vars",
-            # "[][((ENABLED Action2 /\ Action1 ) => (Action2pre)')]_vars",
-            # "[][((~ENABLED Action2 /\ Action1 ) => (~Action2pre)')]_vars"
+            "[][Action1 => (Action2pre <=> Action2pre')]_vars",
         ]
         template += "\n"
         template += "Independence == \n"

@@ -1,0 +1,13 @@
+// Semantic Action Interaction Graph
+digraph {
+	rankdir=LR
+	ClientRequest [shape=box style=rounded]
+	GetEntries [shape=box style=rounded]
+	RollbackEntries [shape=box style=rounded]
+	BecomeLeader [shape=box style=rounded]
+	CommitEntry [shape=box style=rounded]
+	UpdateTerms [shape=box style=rounded]
+	Reconfig [shape=box style=rounded]
+	SendConfig [shape=box style=rounded]
+	dpi=300
+}
