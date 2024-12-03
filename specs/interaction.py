@@ -117,13 +117,21 @@ def compute_semantic_interactions(spec_actions):
         template += "\n"
 
         # Independence conditions (does Action 1 enable/disable Action 2).
-        indep_conds = [
-            "[][Action1 => (Action2pre <=> Action2pre')]_vars",
+        cannot_disable_conds = [
+            "[][(Action1 /\ Action2pre) => (Action2pre')]_vars",
         ]
         template += "\n"
-        template += "Independence == \n"
-        for indep_cond in indep_conds:
-            template += f"    /\ {indep_cond}\n"
+        template += "CannotDisable == \n"
+        for cannot_disable_cond in cannot_disable_conds:
+            template += f"    /\ {cannot_disable_cond}\n"
+
+        cannot_enable_conds = [   
+            "[][(Action1 /\ ~Action2pre) => (~Action2pre')]_vars",
+        ]
+        template += "\n"
+        template += "CannotEnable == \n"
+        for cannot_enable_cond in cannot_enable_conds:
+            template += f"    /\ {cannot_enable_cond}\n"
 
         # Commutativity conditions.
         # Does Action 1 commute with Action 2.
@@ -173,7 +181,8 @@ def compute_semantic_interactions(spec_actions):
         fcfg.write("Value = {v1,v2}\n")
 
         fcfg.write(f"PROPERTIES\n")
-        fcfg.write(f" Independence\n")
+        fcfg.write(f" CannotDisable\n")
+        fcfg.write(f" CannotEnable\n")
         fcfg.write(f" Commutativity\n")
 
         fcfg.close()
