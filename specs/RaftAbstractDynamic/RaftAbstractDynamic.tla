@@ -278,6 +278,8 @@ CommitEntry(i, commitQuorum) ==
     /\ UNCHANGED <<currentTerm, state, log, config, configVersion, configTerm>>
 CommitEntryRVars == <<state, currentTerm, log, config>>
 CommitEntryWVars == <<immediatelyCommitted>>
+CommitEntrypre == \E i \in Server : \E Q \in Quorums(config[i]) : Len(log[i]) > 0 /\ state[i] = Primary /\ log[i][Len(log[i])] = currentTerm[i]
+CommitEntryPostExprs == \E i \in Server :\E c \in immediatelyCommitted : c[1] = Len(log[i]) /\ c[2] = currentTerm[i]
 
 \* Action that exchanges terms between two nodes and step down the primary if
 \* needed. This can be safely specified as a separate action, rather than
@@ -317,7 +319,9 @@ SendConfig(i, j) ==
     /\ UNCHANGED <<currentTerm, state, log, immediatelyCommitted>>
 SendConfigRVars == <<state, configVersion, configTerm>>
 SendConfigWVars == <<config, configVersion, configTerm>>
-
+SendConfigpre == \E i,j \in Server : state[j] = Secondary /\ IsNewerConfig(i, j)
+SendConfigPostExprs == \E i \in Server : <<configVersion[i], configTerm[i], config[i]>>
+    
 Init == 
     /\ currentTerm = [i \in Server |-> InitTerm]
     /\ state       = [i \in Server |-> Secondary]

@@ -87,24 +87,15 @@ Next ==
     \/ DecideAction
 
 
-SendRequestVote_SendVote_A(src, dst) ==
-    /\ ~\E m \in vote_msg : m[1] = src
-    /\ vote_msg' = vote_msg \cup {<<src,dst>>}
-    /\ UNCHANGED <<vote_request_msg,voted,votes,leader,decided>>
-
-NextA == 
-    \/ \E i,j \in Node : SendRequestVote_SendVote_A(i,j)
+NextAOrig == 
+    \/ SendRequestVoteAction
+    \/ SendVoteAction
 
 \* Any two chosen values must be consistent.
 H_NoConflictingValues == 
     \A n1,n2 \in Node, v1,v2 \in Value : 
         (v1 \in decided[n1] /\ v2 \in decided[n2]) => (v1 = v2)
 
-Next2 == 
-    \/ \E i,j \in Node : SendRequestVote_SendVote_A(i,j)
-    \/ RecvVoteAction
-    \/ BecomeLeaderAction
-    \/ DecideAction
 
 TypeOK == 
     /\ vote_request_msg \in SUBSET(Node \X Node)
@@ -133,6 +124,20 @@ SafetyWithTypeOK ==
 
 
 NextUnchanged == UNCHANGED vars
+
+
+consensus_epr_abstract == INSTANCE consensus_epr_abstract WITH 
+                            Node <- Node, 
+                            Value <- Value
+
+Refines == consensus_epr_abstract!Spec
+
+Next2 == 
+    \/ /\ \E i,j \in Node : consensus_epr_abstract!SendRequestVote_SendVote_A(i,j) 
+       /\ UNCHANGED <<vote_request_msg,voted,votes,leader,decided>>
+    \/ RecvVoteAction
+    \/ BecomeLeaderAction
+    \/ DecideAction
 
 \* 
 \* Helper lemmas.

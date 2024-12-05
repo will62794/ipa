@@ -70,12 +70,20 @@ TypeOK ==
   (*************************************************************************)
   (* The type-correctness invariant                                        *)
   (*************************************************************************)
-  /\ rmState \in [RM -> {"working", "prepared", "committed", "aborted"}]
-  /\ tmState \in {"init", "committed", "aborted"}
-  /\ tmPrepared \in SUBSET RM
-  /\ msgsPrepared \in SUBSET [type : {"Prepared"}, rm : RM]
-  /\ msgsCommit \in SUBSET [type : {"Commit"}]
-  /\ msgsAbort \in SUBSET [type : {"Abort"}]
+\*   /\ rmState \in [RM -> {"working", "prepared", "committed", "aborted"}]
+  \/ rmState = [rm1 |-> "working"]
+  \/ rmState = [rm1 |-> "prepared"]
+  \/ rmState = [rm1 |-> "committed"]
+  \/ rmState = [rm1 |-> "aborted"]
+  \/ rmState = [rm2 |-> "working"]
+  \/ rmState = [rm2 |-> "prepared"]
+  \/ rmState = [rm2 |-> "committed"]
+  \/ rmState = [rm2 |-> "aborted"]
+\*   /\ tmState \in {"init", "committed", "aborted"}
+\*   /\ tmPrepared \in SUBSET RM
+\*   /\ msgsPrepared \in SUBSET [type : {"Prepared"}, rm : RM]
+\*   /\ msgsCommit \in SUBSET [type : {"Commit"}]
+\*   /\ msgsAbort \in SUBSET [type : {"Abort"}]
 
 ApaTypeOK ==  
   (*************************************************************************)
@@ -268,18 +276,18 @@ H_TCConsistent ==
   (* A state predicate asserting that two RMs have not arrived at          *)
   (* conflicting decisions.                                                *)
   (*************************************************************************)
-  \A rm1, rm2 \in RM : ~ (rmState[rm1] = "aborted" /\ rmState[rm2] = "committed")
-\*   /\ ~ (rmState["rm1"] = "aborted" /\ rmState["rm2"] = "committed")
-\*   /\ ~ (rmState["rm2"] = "aborted" /\ rmState["rm1"] = "committed")
+\*   \A rm1, rm2 \in RM : ~ (rmState[rm1] = "aborted" /\ rmState[rm2] = "committed")
+  /\ ~ (rmState["rm1"] = "aborted" /\ rmState["rm2"] = "committed")
+  /\ ~ (rmState["rm2"] = "aborted" /\ rmState["rm1"] = "committed")
 
-\* ASSUME A1 == RM = {"rm1", "rm2"}
-\* USE A1
+ASSUME A1 == RM = {"rm1", "rm2"}
+USE A1
 
 \* THEOREM L1 == TypeOK /\ H_TCConsistent /\ \E rm \in RM : RMChooseToAbort(rm) => H_TCConsistent'
 \*  <1> QED BY DEF H_TCConsistent, RMChooseToAbort, TypeOK
 
-\* THEOREM L1a == TypeOK /\ H_TCConsistent /\ RMChooseToAbort("rm1") => H_TCConsistent'
-\*  <1> QED BY DEF H_TCConsistent, RMChooseToAbort, TypeOK
+THEOREM L1a == TypeOK /\ H_TCConsistent /\ RMChooseToAbort("rm1") => H_TCConsistent'
+ <1> QED BY DEF H_TCConsistent, RMChooseToAbort, TypeOK
 
 \* THEOREM L2 == H_TCConsistent /\ TMCommit => H_TCConsistent'
 \*  <1> QED BY DEF H_TCConsistent, TMCommit
