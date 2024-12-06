@@ -295,6 +295,8 @@ UpdateTermsWVars == <<currentTerm, state>>
 \* A reconfig occurs on node i. The node must currently be a leader.
 Reconfig(i, newConfig) ==
     /\ state[i] = Primary
+    /\ configVersion = configVersion
+    /\ configTerm = configTerm
     /\ ConfigQuorumCheck(i)
     /\ TermQuorumCheck(i)
     /\ QuorumsOverlap(config[i], newConfig)
@@ -381,6 +383,27 @@ Action_SendConfig == [
     post_primed |-> {SendConfig(s, t)!post!1!2' : s,t \in Server}
 ]
 
+CONSTANTS 
+    \* @type: Int;
+    MaxTerm, 
+    \* @type: Int;
+    MaxLogLen,
+    MaxConfigVersion
+
+SeqOf(S, n) == UNION {[1..m -> S] : m \in 0..n}
+BoundedSeq(S, n) == SeqOf(S, n)
+
+\* Statement of type correctness.
+TypeOK ==
+    /\ currentTerm \in [Server -> Nat]
+    /\ state \in [Server -> {Secondary, Primary}]
+    /\ log \in [Server -> BoundedSeq(Nat, MaxLogLen)]
+    /\ config \in [Server -> SUBSET Server]
+    /\ configVersion \in [Server -> Nat]
+    /\ configTerm \in [Server -> Nat]
+    \* /\ immediatelyCommitted \in SUBSET [ entry : Nat \X Nat, term : Nat ]
+    /\ immediatelyCommitted = {} \* SUBSET [ entry : Nat \X Nat, term : Nat ]
+
 
 \* IndependenceInit == TypeOK
 \* IndependenceNext == Action1 \/ Action2
@@ -443,12 +466,6 @@ StateMachineSafety ==
 
 --------------------------------------------------------------------------------
 
-CONSTANTS 
-    \* @type: Int;
-    MaxTerm, 
-    \* @type: Int;
-    MaxLogLen,
-    MaxConfigVersion
 
 \* State Constraint. Used for model checking only.
 StateConstraint == 

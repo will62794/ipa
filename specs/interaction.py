@@ -209,7 +209,19 @@ def compute_semantic_interactions(spec_actions):
             fcfg.write("Acceptor = {a1,a2}\n")
             fcfg.write("Ballot = {0,1}\n")
             fcfg.write("None = None\n")
-        fcfg.write("Value = {v1,v2}\n")
+            fcfg.write("Value = {v1,v2}\n")
+
+        if "RaftAbstractDynamic" in specname:
+            fcfg.write("Server = {s1,s2}\n")
+            fcfg.write("Nil = Nil\n")
+            fcfg.write("Secondary = Secondary\n")
+            fcfg.write("Primary = Primary\n")
+            fcfg.write("MaxLogLen = 2\n")
+            fcfg.write("MaxTerm = 2\n")
+            fcfg.write("Nat = {0,1,2}\n")
+            fcfg.write("MaxConfigVersion = 2\n")
+            fcfg.write("InitTerm = 0\n")
+            fcfg.write("CONSTRAINT StateConstraint\n")
 
         # fcfg.write(f"PROPERTIES\n")
         fcfg.write(f"INVARIANTS\n")
