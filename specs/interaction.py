@@ -223,6 +223,10 @@ def compute_semantic_interactions(spec_actions):
             fcfg.write("InitTerm = 0\n")
             fcfg.write("CONSTRAINT StateConstraint\n")
 
+        if "Bakery" in specname:
+            fcfg.write("N = 2\n")
+            fcfg.write("Nat = {0,1,2}\n")
+
         # fcfg.write(f"PROPERTIES\n")
         fcfg.write(f"INVARIANTS\n")
         fcfg.write(f" CannotDisable\n")
