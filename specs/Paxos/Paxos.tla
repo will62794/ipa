@@ -139,22 +139,12 @@ msg2b(a,b,v) == \E m \in msgs2b : m.type= "2b" /\ m.acc = a /\ m.bal = b /\ m.va
 (* m with m.type = "1a") that begins ballot b.                             *)
 (***************************************************************************)
 Phase1a(b) == 
-    /\ b = 0
     /\ msgs1a' = msgs1a \cup {[type |-> "1a", bal |-> b]}
     /\ UNCHANGED <<maxBal, maxVBal,maxVal,msgs1b,msgs2a,msgs2b,chosen>>
 Phase1aRVars == <<msgs1a>>
 Phase1aWVars == <<msgs1a>>
-Phase1apre == \E b \in Ballot : b = 0
+Phase1apre == TRUE
 Phase1aPostExprs == <<msgs1a>>
-
-Phase1a_2(b) == 
-    /\ b = 1
-    /\ msgs1a' = msgs1a \cup {[type |-> "1a", bal |-> b]}
-    /\ UNCHANGED <<maxBal, maxVBal,maxVal,msgs1b,msgs2a,msgs2b,chosen>>
-Phase1a_2RVars == <<msgs1a>>
-Phase1a_2WVars == <<msgs1a>>
-Phase1a_2pre == \E b \in Ballot : b = 1
-Phase1a_2PostExprs == <<msgs1a>>
 
                 
 (***************************************************************************)
@@ -167,46 +157,15 @@ Phase1b(a, b) ==
     \E m \in msgs1a : 
         /\ m.type = "1a"
         /\ m.bal = b
-        /\ b = 0
         /\ m.bal > maxBal[a]
         /\ maxBal' = [maxBal EXCEPT ![a] = m.bal]
         /\ msgs1b' = msgs1b \cup {[type |-> "1b", acc |-> a, bal |-> m.bal, mbal |-> maxVBal[a], mval |-> maxVal[a]]}
         /\ UNCHANGED <<maxVBal, maxVal,msgs1a,msgs2a,msgs2b,chosen>>
 Phase1bRVars == <<msgs1a, msgs1b, maxVBal, maxVal>>
 Phase1bWVars == <<msgs1b, maxBal>>
-Phase1bpre == \E a \in Acceptor, b \in Ballot : \E m \in msgs1a : m.type = "1a" /\ m.bal = b /\ m.bal > maxBal[a] /\ b = 0
+Phase1bpre == \E a \in Acceptor, b \in Ballot : \E m \in msgs1a : m.type = "1a" /\ m.bal = b /\ m.bal > maxBal[a]
 \* Phase1bPostExprs == <<maxBal, maxVBal, maxVal, msgs1b>>
-Phase1bPostExprs == <<maxVBal, maxVal, msgs1b>>
-
-Phase1b_2(a, b) == 
-    \E m \in msgs1a : 
-        /\ m.type = "1a"
-        /\ m.bal = b
-        /\ b = 1
-        /\ m.bal > maxBal[a]
-        /\ maxBal' = [maxBal EXCEPT ![a] = m.bal]
-        /\ msgs1b' = msgs1b \cup {[type |-> "1b", acc |-> a, bal |-> m.bal, mbal |-> maxVBal[a], mval |-> maxVal[a]]}
-        /\ UNCHANGED <<maxVBal, maxVal,msgs1a,msgs2a,msgs2b,chosen>>
-Phase1b_2RVars == <<msgs1a, msgs1b, maxVBal, maxVal>>
-Phase1b_2WVars == <<msgs1b, maxBal>>
-Phase1b_2pre == \E a \in Acceptor, b \in Ballot : \E m \in msgs1a : m.type = "1a" /\ m.bal = b /\ m.bal > maxBal[a] /\ b = 1
-\* Phase1bPostExprs == <<maxBal, maxVBal, maxVal, msgs1b>>
-Phase1b_2PostExprs == <<maxVBal, maxVal, msgs1b>>
-
-Phase1b_3(a, b) == 
-    \E m \in msgs1a : 
-        /\ m.type = "1a"
-        /\ m.bal = b
-        /\ b = 2
-        /\ m.bal > maxBal[a]
-        /\ maxBal' = [maxBal EXCEPT ![a] = m.bal]
-        /\ msgs1b' = msgs1b \cup {[type |-> "1b", acc |-> a, bal |-> m.bal, mbal |-> maxVBal[a], mval |-> maxVal[a]]}
-        /\ UNCHANGED <<maxVBal, maxVal,msgs1a,msgs2a,msgs2b,chosen>>
-Phase1b_3RVars == <<msgs1a, msgs1b, maxVBal, maxVal>>
-Phase1b_3WVars == <<msgs1b, maxBal>>
-Phase1b_3pre == \E a \in Acceptor, b \in Ballot : \E m \in msgs1a : m.type = "1a" /\ m.bal = b /\ m.bal > maxBal[a] /\ b = 2
-\* Phase1bPostExprs == <<maxBal, maxVBal, maxVal, msgs1b>>
-Phase1b_3PostExprs == <<maxVBal, maxVal, msgs1b>>
+Phase1bPostExprs == <<TRUE>>
 
 (***************************************************************************)
 (* The Phase2a(b, v) action can be performed by the ballot b leader if two *)
@@ -236,7 +195,7 @@ Q1b(Q, b) ==
 Q1bv(Q, b) == {m \in Q1b(Q,b) : m.mbal \geq 0}
     
 Phase2a(b, v) ==
-  /\ ~ \E m \in msgs2a : m.type = "2a" /\ m.bal = b /\ b = 0
+  /\ ~ \E m \in msgs2a : m.type = "2a" /\ m.bal = b
   /\ \E Q \in Quorum :
         /\ \A a \in Q : \E m \in Q1b(Q,b) : m.acc = a 
         /\ \/ Q1bv(Q, b) = {}
@@ -248,7 +207,7 @@ Phase2a(b, v) ==
 Phase2aRVars == <<msgs2a, msgs1b>>
 Phase2aWVars == <<msgs2a>>
 Phase2apre == 
-    /\ \E b \in Ballot : ~\E m \in msgs2a : m.type = "2a" /\ m.bal = b /\ b = 0
+    /\ \E b \in Ballot : ~\E m \in msgs2a : m.type = "2a" /\ m.bal = b
     /\ \E b \in Ballot : \E v \in Value : \E Q \in Quorum :
         /\ \A a \in Q : \E m \in Q1b(Q,b) : m.acc = a 
         /\ \/ Q1bv(Q, b) = {}
@@ -256,29 +215,6 @@ Phase2apre ==
                 /\ m.mval = v
                 /\ \A mm \in Q1bv(Q, b) : m.mbal \geq mm.mbal 
 Phase2aPostExprs == <<msgs2a>>
-
-Phase2a_2(b, v) ==
-  /\ ~ \E m \in msgs2a : m.type = "2a" /\ m.bal = b /\ b = 1
-  /\ \E Q \in Quorum :
-        /\ \A a \in Q : \E m \in Q1b(Q,b) : m.acc = a 
-        /\ \/ Q1bv(Q, b) = {}
-           \/ \E m \in Q1bv(Q, b) : 
-                /\ m.mval = v
-                /\ \A mm \in Q1bv(Q, b) : m.mbal \geq mm.mbal 
-  /\ msgs2a' = msgs2a \cup {[type |-> "2a", bal |-> b, val |-> v]}
-  /\ UNCHANGED <<maxBal, maxVBal, maxVal,msgs1a,msgs1b,msgs2b,chosen>>
-Phase2a_2RVars == <<msgs2a, msgs1b>>
-Phase2a_2WVars == <<msgs2a>>
-Phase2a_2pre == 
-    /\ \E b \in Ballot : ~\E m \in msgs2a : m.type = "2a" /\ m.bal = b /\ b = 1
-    /\ \E b \in Ballot : \E v \in Value : \E Q \in Quorum :
-        /\ \A a \in Q : \E m \in Q1b(Q,b) : m.acc = a 
-        /\ \/ Q1bv(Q, b) = {}
-           \/ \E m \in Q1bv(Q, b) : 
-                /\ m.mval = v
-                /\ \A mm \in Q1bv(Q, b) : m.mbal \geq mm.mbal 
-Phase2a_2PostExprs == <<msgs2a>>
-
 
 (***************************************************************************)
 (* The Phase2b(a) action is performed by acceptor a upon receipt of a      *)
@@ -293,7 +229,6 @@ Phase2b(a, b) ==
     \E m \in msgs2a : 
         /\ m.type = "2a"
         /\ m.bal = b
-        /\ b = 0
         /\ m.bal \geq maxBal[a]
         /\ maxBal' = [maxBal EXCEPT ![a] = m.bal] 
         /\ maxVBal' = [maxVBal EXCEPT ![a] = m.bal] 
@@ -302,40 +237,8 @@ Phase2b(a, b) ==
         /\ UNCHANGED <<msgs1a,msgs1b,msgs2a,chosen>>
 Phase2bRVars == <<msgs2a, maxBal>>
 Phase2bWVars == <<maxBal, maxVBal, maxVal,msgs2b>>
-Phase2bpre == \E a \in Acceptor, b \in Ballot : \E m \in msgs2a : m.type = "2a" /\ m.bal = b /\ m.bal \geq maxBal[a] /\ b = 0
+Phase2bpre == \E a \in Acceptor, b \in Ballot : \E m \in msgs2a : m.type = "2a" /\ m.bal = b /\ m.bal \geq maxBal[a]
 Phase2bPostExprs == <<maxBal, maxVBal, maxVal, msgs2b>>
-
-Phase2b_2(a, b) == 
-    \E m \in msgs2a : 
-        /\ m.type = "2a"
-        /\ m.bal = b
-        /\ b = 1
-        /\ m.bal \geq maxBal[a]
-        /\ maxBal' = [maxBal EXCEPT ![a] = m.bal] 
-        /\ maxVBal' = [maxVBal EXCEPT ![a] = m.bal] 
-        /\ maxVal' = [maxVal EXCEPT ![a] = m.val]
-        /\ msgs2b' = msgs2b \cup {[type |-> "2b", acc |-> a, bal |-> m.bal, val |-> m.val]} 
-        /\ UNCHANGED <<msgs1a,msgs1b,msgs2a,chosen>>
-Phase2b_2RVars == <<msgs2a, maxBal>>
-Phase2b_2WVars == <<maxBal, maxVBal, maxVal,msgs2b>>
-Phase2b_2pre == \E a \in Acceptor, b \in Ballot : \E m \in msgs2a : m.type = "2a" /\ m.bal = b /\ m.bal \geq maxBal[a] /\ b = 1
-Phase2b_2PostExprs == <<maxBal, maxVBal, maxVal, msgs2b>>
-
-Phase2b_3(a, b) == 
-    \E m \in msgs2a : 
-        /\ m.type = "2a"
-        /\ m.bal = b
-        /\ b = 2
-        /\ m.bal \geq maxBal[a]
-        /\ maxBal' = [maxBal EXCEPT ![a] = m.bal] 
-        /\ maxVBal' = [maxVBal EXCEPT ![a] = m.bal] 
-        /\ maxVal' = [maxVal EXCEPT ![a] = m.val]
-        /\ msgs2b' = msgs2b \cup {[type |-> "2b", acc |-> a, bal |-> m.bal, val |-> m.val]} 
-        /\ UNCHANGED <<msgs1a,msgs1b,msgs2a,chosen>>
-Phase2b_3RVars == <<msgs2a, maxBal>>
-Phase2b_3WVars == <<maxBal, maxVBal, maxVal,msgs2b>>
-Phase2b_3pre == \E a \in Acceptor, b \in Ballot : \E m \in msgs2a : m.type = "2a" /\ m.bal = b /\ m.bal \geq maxBal[a] /\ b = 2
-Phase2b_3PostExprs == <<maxBal, maxVBal, maxVal, msgs2b>>
 
 votes == [a \in Acceptor |->  
            {<<m.bal, m.val>> : m \in {mm \in msgs2b: /\ mm.type = "2b"
@@ -366,32 +269,20 @@ LearnPostExprs == <<chosen>>
 (***************************************************************************)
 
 Phase1aAction == TRUE /\ \E b \in Ballot : Phase1a(b)
-Phase1a_2Action == TRUE /\ \E b \in Ballot : Phase1a_2(b)
 Phase2aAction == TRUE /\ \E b \in Ballot : \E v \in Value : Phase2a(b, v)
-Phase2a_2Action == TRUE /\ \E b \in Ballot : \E v \in Value : Phase2a_2(b, v)
 Phase1bAction == TRUE /\ \E a \in Acceptor, b \in Ballot : Phase1b(a, b) 
-Phase1b_2Action == TRUE /\ \E a \in Acceptor, b \in Ballot : Phase1b_2(a, b)
-Phase1b_3Action == TRUE /\ \E a \in Acceptor, b \in Ballot : Phase1b_3(a, b)
 Phase2bAction == TRUE /\ \E a \in Acceptor, b \in Ballot : Phase2b(a, b)
-Phase2b_2Action == TRUE /\ \E a \in Acceptor, b \in Ballot : Phase2b_2(a, b)
-Phase2b_3Action == TRUE /\ \E a \in Acceptor, b \in Ballot : Phase2b_3(a, b)
-\* LearnAction == TRUE /\ \E v \in Value : Learn(v)
+LearnAction == TRUE /\ \E v \in Value : Learn(v)
 
 (***************************************************************************)
 (* Below are defined the next-state action and the complete spec.          *)
 (***************************************************************************)
 Next == 
     \/ Phase1aAction
-    \/ Phase1a_2Action
     \/ Phase2aAction
-    \/ Phase2a_2Action
     \/ Phase1bAction
-    \/ Phase1b_2Action
-    \/ Phase1b_3Action
     \/ Phase2bAction
-    \/ Phase2b_2Action
-    \/ Phase2b_3Action
-    \* \/ LearnAction
+    \/ LearnAction
 
 Spec == Init /\ [][Next]_vars
 ----------------------------------------------------------------------------
