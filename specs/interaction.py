@@ -100,9 +100,6 @@ def compute_semantic_interactions(spec_actions):
         if action1 == action2:
             continue
 
-        if "RMRcvCommitMsgAction" not in [action1,action2] or "RMRcvAbortMsgAction" not in [action1,action2]:
-            continue
-
         template = ""
         modname = f"{specname}_interaction"
         template += f"---- MODULE {modname} ----\n"
