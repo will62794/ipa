@@ -104,6 +104,11 @@ def compute_semantic_interactions(spec_actions):
         template += f"EXTENDS {specname}\n"
         template += "\n"
 
+        template += "VARIABLE tookStep\n"
+        template += "VARIABLE wasEnabled\n"
+        template += "VARIABLE varsPrev\n"
+        template += "\n"
+
         template += "Action1 == TRUE\n"
         template += f"Action2 == TRUE\n"
         template += f"Action1pre == TRUE\n"
@@ -112,13 +117,37 @@ def compute_semantic_interactions(spec_actions):
         template += f"Action2PostExprs == TRUE\n"
         template += "\n"
 
-        template += "InteractionInit == TypeOK\n"
-        template += "InteractionNext == Action1 \/ Action2\n"
+        template += "InteractionInit == \n"
+        template += "  /\ TypeOK\n"
+        template += "  /\ wasEnabled = FALSE\n"
+        template += "  /\ tookStep = FALSE\n"
+        template += "  /\ varsPrev = <<>>\n"
+        template += "\n"
+
+        # Really, we shouldn't be considering commutativity based on writes to *all* variables e.g.
+        # if two actions have no overlap in their variable read/write sets, then they naturally shouldn't
+        # be considered as "interacting". So, rather, to check whether Action1 interacts with Action2, we
+        # only consider the intersection of variables Action2 reads from.
+        a2_read_vars = action_interaction_vars[action2.replace("Action", "")]["read_vars"]
+        template += f"Action2_read_vars == <<{','.join(a2_read_vars)}>>\n"
+        template += "\n"
+
+        template += "InteractionNext == \n"
+        template += "  /\ Action1\n"
+        template += "  /\ wasEnabled' = ENABLED Action2\n"
+        template += "  /\ tookStep' = TRUE\n"
+
+        # Really, we shouldn't be considering commutativity based on writes to *all* variables e.g.
+        # if two actions have no overlap in their variable read/write sets, then they naturally shouldn't
+        # be considered as "interacting". So, rather, to check whether Action1 interacts with Action2, we
+        # only consider the intersection of variables Action2 reads from.
+        template += f"  /\ varsPrev' = Action2_read_vars\n"
         template += "\n"
 
         # Independence conditions (does Action 1 enable/disable Action 2).
         cannot_disable_conds = [
-            "[][(Action1 /\ Action2pre) => (Action2pre')]_vars",
+            # "[][(Action1 /\ Action2pre) => (Action2pre')]_vars",
+            "(tookStep /\ wasEnabled) => ENABLED Action2"
         ]
         template += "\n"
         template += "CannotDisable == \n"
@@ -126,7 +155,8 @@ def compute_semantic_interactions(spec_actions):
             template += f"    /\ {cannot_disable_cond}\n"
 
         cannot_enable_conds = [   
-            "[][(Action1 /\ ~Action2pre) => (~Action2pre')]_vars",
+            # "[][(Action1 /\ ~Action2pre) => (~Action2pre')]_vars",
+            "(tookStep /\ ~wasEnabled) => (~ENABLED Action2)"
         ]
         template += "\n"
         template += "CannotEnable == \n"
@@ -136,7 +166,8 @@ def compute_semantic_interactions(spec_actions):
         # Commutativity conditions.
         # Does Action 1 commute with Action 2.
         comm_conds = [
-            "[][Action1 => Action2PostExprs = Action2PostExprs']_vars",
+            # "[][Action1 => Action2PostExprs = Action2PostExprs']_vars",
+            "tookStep => (varsPrev = Action2_read_vars)"
         ]
         template += "\n"
         template += "Commutativity == \n"
@@ -155,10 +186,10 @@ def compute_semantic_interactions(spec_actions):
         fcfg.write(f"CONSTANTS\n")
         fcfg.write(f"Action1 <- {action1}\n")
         fcfg.write(f"Action2 <- {action2}\n")
-        fcfg.write(f"Action1pre <- {action1.replace('Action', '')}pre\n")
-        fcfg.write(f"Action2pre <- {action2.replace('Action', '')}pre\n")
-        fcfg.write(f"Action1PostExprs <- {action1.replace('Action', '')}PostExprs\n")
-        fcfg.write(f"Action2PostExprs <- {action2.replace('Action', '')}PostExprs\n")
+        # fcfg.write(f"Action1pre <- {action1.replace('Action', '')}pre\n")
+        # fcfg.write(f"Action2pre <- {action2.replace('Action', '')}pre\n")
+        # fcfg.write(f"Action1PostExprs <- {action1.replace('Action', '')}PostExprs\n")
+        # fcfg.write(f"Action2PostExprs <- {action2.replace('Action', '')}PostExprs\n")
 
         if "Paxos" in specname:
             fcfg.write("TypeOK <- TypeOKRandom\n")
@@ -180,7 +211,8 @@ def compute_semantic_interactions(spec_actions):
             fcfg.write("None = None\n")
         fcfg.write("Value = {v1,v2}\n")
 
-        fcfg.write(f"PROPERTIES\n")
+        # fcfg.write(f"PROPERTIES\n")
+        fcfg.write(f"INVARIANTS\n")
         fcfg.write(f" CannotDisable\n")
         fcfg.write(f" CannotEnable\n")
         fcfg.write(f" Commutativity\n")
