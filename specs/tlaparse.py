@@ -413,7 +413,8 @@ class TLASpec:
     def get_action_var_info(self, action):
         vars_in_action, action_updated_vars = self.get_vars_in_def(action)
         vars_in_action_non_updated, _ = self.get_vars_in_def(action, ignore_update_expressions=True)
-        print(f"### Vars in action '{action}'", vars_in_action, action_updated_vars)
+        print(f"### Vars in action '{action}'", vars_in_action)
+        # print("action_updated_vars:", action_updated_vars)
         # print("----")
         # print(f"### Vars in action non-updated '{action}'", vars_in_action_non_updated)
         # print("----")
@@ -430,9 +431,24 @@ class TLASpec:
         # Variables written to.
         written_vars = set(action_updated_vars.keys())
 
+        print(action_updated_vars)
+        write_dep_vars = set()
+        for v in action_updated_vars:
+            print(v, action_updated_vars[v][v])
+            write_dep_vars.update(action_updated_vars[v][v])
+
+        # TODO: Properly extract update dependencies vars.
+        # print(action_updated_vars)
+        # write_dep_vars = action_updated_vars[list(action_updated_vars.keys())[0]]
+        # write_dep_vars = [write_dep_vars[x] for x in write_dep_vars][0]
+        # write_dep_vars = list(set.union(*[write_dep_vars[x] for x in write_dep_vars]))
+        # print("write_dep_vars:", write_dep_vars)
+
         return {
             "read_vars": read_vars,
-            "write_vars": written_vars
+            "write_vars": written_vars,
+            # Variables that appear in update expressions.
+            "write_dep_vars": write_dep_vars
         }
 
 

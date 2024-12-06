@@ -28,6 +28,7 @@ for udef in my_spec.get_all_user_defs(level="2"):
 
 action_interaction_vars = {a.replace("Action", ""):{} for a in actions_from_spec}
 for action in actions_from_spec:
+    vars_in_action,action_updated_vars = my_spec.get_vars_in_def(action)
     ret = my_spec.get_action_var_info(action)
     print(action, ret)
     action_interaction_vars[action.replace("Action", "")] = ret
@@ -57,6 +58,7 @@ dot.attr(rankdir='LR')
 # Add nodes for each action
 for action in action_interaction_vars:
     dot.node(action, shape='box', style='rounded')
+    print(action, action_interaction_vars[action]["write_dep_vars"])
 
 # Add edges between actions that interact
 for action1 in action_interaction_vars:
@@ -98,6 +100,9 @@ def compute_semantic_interactions(spec_actions):
         if action1 == action2:
             continue
 
+        if "RMRcvCommitMsgAction" not in [action1,action2] or "RMRcvAbortMsgAction" not in [action1,action2]:
+            continue
+
         template = ""
         modname = f"{specname}_interaction"
         template += f"---- MODULE {modname} ----\n"
@@ -128,7 +133,7 @@ def compute_semantic_interactions(spec_actions):
         # if two actions have no overlap in their variable read/write sets, then they naturally shouldn't
         # be considered as "interacting". So, rather, to check whether Action1 interacts with Action2, we
         # only consider the intersection of variables Action2 reads from.
-        a2_read_vars = action_interaction_vars[action2.replace("Action", "")]["read_vars"]
+        a2_read_vars = action_interaction_vars[action2.replace("Action", "")]["write_dep_vars"]
         template += f"Action2_read_vars == <<{','.join(a2_read_vars)}>>\n"
         template += "\n"
 
