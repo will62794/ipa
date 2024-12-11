@@ -69,8 +69,8 @@ TypeOK ==
   /\ rmState \in [RM -> {"working", "prepared", "committed", "aborted"}]
   /\ tmState \in {"init", "committed", "aborted"}
   /\ tmPrepared \in SUBSET RM
-  /\ msgs \in SUBSET [type : {"Prepared", "Commit", "Abort"}, rm : RM]
-
+  /\ msgs \in SUBSET ([type : {"Prepared"}, rm : RM] \cup [type: {"Commit", "Abort"}])
+  
 ApaTypeOK ==  
   (*************************************************************************)
   (* The type-correctness invariant                                        *)
