@@ -70,7 +70,7 @@ TypeOK ==
   /\ tmState \in {"init", "committed", "aborted"}
   /\ tmPrepared \in SUBSET RM
   /\ msgs \in SUBSET ([type : {"Prepared"}, rm : RM] \cup [type: {"Commit", "Abort"}])
-  
+
 ApaTypeOK ==  
   (*************************************************************************)
   (* The type-correctness invariant                                        *)
@@ -116,7 +116,7 @@ TMCommit ==
   /\ tmPrepared = RM
   /\ tmState' = "committed"
   /\ msgs' = msgs \cup {[type |-> "Commit"]}
-  /\ UNCHANGED <<rmState, tmPrepared, msgs>>
+  /\ UNCHANGED <<rmState, tmPrepared>>
 TMCommitRVars == <<tmState, tmPrepared, msgs>>
 TMCommitWVars == <<tmState, msgs>>
 TMCommitpre == tmState = "init" /\ tmPrepared = RM
@@ -129,7 +129,7 @@ TMAbort ==
   /\ tmState = "init"
   /\ tmState' = "aborted"
   /\ msgs' = msgs \cup {[type |-> "Abort"]}
-  /\ UNCHANGED <<rmState, tmPrepared, msgs>>
+  /\ UNCHANGED <<rmState, tmPrepared>>
 TMAbortRVars == <<tmState, msgs>>
 TMAbortWVars == <<tmState, msgs>>
 TMAbortpre == tmState = "init"
@@ -142,7 +142,7 @@ RMPrepare(rm) ==
   /\ rmState[rm] = "working"
   /\ rmState' = [rmState EXCEPT ![rm] = "prepared"]
   /\ msgs' = msgs \cup {[type |-> "Prepared", rm |-> rm]}
-  /\ UNCHANGED <<tmState, tmPrepared, msgs>>
+  /\ UNCHANGED <<tmState, tmPrepared>>
 RMPrepareRVars == <<rmState, msgs>>
 RMPrepareWVars == <<rmState, msgs>>
 RMPreparepre == \E rm \in RM : rmState[rm] = "working"
@@ -196,7 +196,7 @@ TMCommitAction == TRUE /\ TMCommit
 RMAtomic(rm) == 
     /\ msgs = {} 
     /\ msgs' = msgs \cup {[type |-> "Prepared", rm |-> rm]}
-    /\ UNCHANGED <<tmState, tmPrepared, rmState, msgs>>
+    /\ UNCHANGED <<tmState, tmPrepared, rmState>>
 
 InitRM ==   
   (*************************************************************************)
