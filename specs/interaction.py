@@ -4,6 +4,8 @@ import sys
 import subprocess
 import itertools
 
+TLC_JAR = "../tla2tools.jar"
+
 # specname = "Paxos"
 specname = "RaftAbstractDynamic"
 specname = "AsyncRaft"
@@ -243,7 +245,7 @@ def compute_semantic_interactions(spec_actions):
         simulate = ""
         if "Paxos" in specname:
             simulate = "-simulate num=10000 -depth 4"
-        cmd = f"java -cp /usr/local/tla2tools-v1.8.jar tlc2.TLC -workers 4 -maxSetSize 10000000 {simulate} -noGenerateSpecTE -deadlock -metadir {metadir} {specname}_interaction"
+        cmd = f"java -cp {TLC_JAR} tlc2.TLC -workers 4 -maxSetSize 10000000 {simulate} -noGenerateSpecTE -deadlock -metadir {metadir} {specname}_interaction"
         print(cmd)
         subproc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=specname)
         res = subproc.wait()
