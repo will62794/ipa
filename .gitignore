@@ -8,3 +8,4 @@ logout
 *_interaction.tla
 .tlacache/
 *.toolbox/
+__pycache__/
