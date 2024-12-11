@@ -1,0 +1,13 @@
+// Semantic Action Interaction Graph
+digraph {
+	rankdir=LR
+	TMRcvPrepared [shape=box style=rounded]
+	RMPrepare [shape=box style=rounded]
+	RMChooseToAbort [shape=box style=rounded]
+	RMRcvCommitMsg [shape=box style=rounded]
+	RMRcvAbortMsg [shape=box style=rounded]
+	TMAbort [shape=box style=rounded]
+	TMCommit [shape=box style=rounded]
+	RMPrepare -> RMChooseToAbort [label="" fontsize=12]
+	dpi=300
+}
